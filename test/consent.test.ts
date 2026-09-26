@@ -321,6 +321,13 @@ describe("consent click test (real browser)", () => {
     expect(r.consent?.reject?.clicked).toBe(true);
   }, 30000);
 
+  it("never takes the cookieconsent opt-out banner type for a content blocker", async () => {
+    const r = await scan(`${fx.origin}/banner-cc-opt-out`, opts());
+    expect(r.consent?.banner).toMatchObject({ detected: true, rejectFound: true, acceptFound: true });
+    expect(r.consent?.reject?.control?.label).toBe("Notwendiges zulassen");
+    expect(r.consent?.accept?.clicked).toBe(true);
+  }, 30000);
+
   it("never takes a push-notification prompt for a cookie banner", async () => {
     const r = await scan(`${fx.origin}/push-prompt`, { ...opts(), bannerWaitMs: 800 });
     expect(r.consent?.banner).toMatchObject({ detected: false, rejectFound: false, acceptFound: false });

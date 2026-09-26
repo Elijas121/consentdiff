@@ -301,6 +301,9 @@ export async function startFixtures(): Promise<Fixtures> {
       case "/newsletter-statistics":
         // A newsletter prompt that mentions statistics and personal data: still no cookie decision.
         return html(200, page(`<h1>Shop</h1>${FOOTER}<div role="dialog" style="position:fixed;top:0;left:30%;width:40%;background:#fff;padding:1rem"><p>Unser Newsletter mit Statistiken zum Markt. Ihre personenbezogenen Daten nutzen wir nur für den Versand.</p><button type="button">Ablehnen</button><button type="button">Zustimmen</button></div>`));
+      case "/banner-cc-opt-out":
+        // The cookieconsent script names its opt-out banner type "cc-type-opt-out": that is the banner, not a content blocker.
+        return html(200, page(`<h1>Praxis</h1>${FOOTER}<div class="cc-window" role="dialog" style="position:fixed;inset:20% 20% auto 20%;background:#fff;padding:1rem"><div class="cc-modal cc-window cc-type-opt-out"><p>Wenn Sie unsere Webseite uneingeschränkt verwenden möchten, klicken Sie bitte auf »Alles zulassen«. Mehr in der <a href="/datenschutz">Datenschutzerklärung</a>.</p><div class="cc-compliance"><a class="cc-btn cc-allow" role="button" tabindex="0" aria-label="allow cookies">Alles zulassen</a><a class="cc-btn cc-deny" role="button" tabindex="0" aria-label="deny cookies">Notwendiges zulassen</a></div></div></div><script>document.querySelectorAll('.cc-btn').forEach(function(b){b.addEventListener('click',function(){document.querySelector('.cc-window').remove();});});</script>`));
       case "/banner-many-links": {
         // A news page: many links whose text passes the cheap pre-filter come before the banner in the DOM.
         const teasers = Array.from({ length: 25 }, (_, i) => `<li><a href="/artikel-${i}">Zustimmung zur Reform ${i}</a></li>`).join("");

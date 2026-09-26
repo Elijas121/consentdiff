@@ -116,3 +116,13 @@ describe("wording found in the second held-out sample", () => {
     for (const l of ["Rechazo y me suscribo", "Rechazar y suscribirse"]) expect(isRejectLabel(l), l).toBe(false);
   });
 });
+
+describe("wording found in the third held-out sample", () => {
+  it("knows these general rejects", () => {
+    for (const l of ["Nie zgadzam się", "Alleen noodzakelijk", "Notwendiges zulassen", "Nur Erforderliches akzeptieren"]) {
+      expect(isRejectLabel(l), l).toBe(true);
+      expect(CANDIDATE_LABEL.test(l), l).toBe(true);
+    }
+    for (const l of ["Notwendiges Update installieren", "Nie zgadzam się na newsletter"]) expect(isRejectLabel(l), l).toBe(false);
+  });
+});

@@ -47,6 +47,7 @@ const REJECT_STRICT: RegExp[] = [
   /^(alle\s+)?(optionalen?|nicht\s+notwendigen?|zusätzlichen?)(\s+cookies)?\s+ablehnen$/,
   /^nur\s+(das\s+)?(nötigste|notwendigste)$/,
   /^(nur\s+)?(technisch\s+)?(notwendige|erforderliche|essenzielle|essentielle)(\s+cookies)?(\s+(akzeptieren|zulassen|erlauben|verwenden|speichern))?$/,
+  /^(nur\s+)?(technisch\s+)?(notwendiges|erforderliches)\s+(akzeptieren|zulassen|erlauben)$/,
   /^(weiter\s+)?ohne\s+(zustimmung|einwilligung|akzeptieren)(\s+(fortfahren|weiter|weiterlesen))?$/,
   /^(reject|decline|deny|refuse)(\s+all)?(\s+cookies)?$/,
   /^((accept|allow|use)\s+)?(only\s+)?(strictly\s+)?(necessary|essential|required)(\s+cookies)?(\s+only)?$/,
@@ -63,8 +64,9 @@ const REJECT_STRICT: RegExp[] = [
   /^(rechazar(\s+tod[oa]s?)?(\s+las\s+cookies)?|continuar\s+sin\s+aceptar)$/,
   /^(aceptar\s+)?solo\s+(las\s+)?(cookies\s+)?(necesarias|esenciales|técnicas)$/,
   /^((alles|alle(\s+cookies)?)\s+)?(weigeren|afwijzen)$/,
-  /^alleen\s+(noodzakelijke|functionele|essentiële)(\s+cookies)?(\s+(accepteren|toestaan))?$/,
+  /^alleen\s+(noodzakelijke?|functionele|essentiële)(\s+cookies)?(\s+(accepteren|toestaan))?$/,
   /^odrzuć(\s+wszystk(ie|o))?$/,
+  /^nie\s+zgadzam\s+się$/,
   /^(akceptuj\s+)?tylko\s+(niezbędne|wymagane|konieczne)(\s+(pliki\s+)?cookies?)?$/,
 ];
 const ACCEPT_STRICT: RegExp[] = [
@@ -135,7 +137,7 @@ const isOverlayElement = (el: Element): boolean => {
   };
   for (let n: Element | null = el; n; n = up(n)) {
     // A content blocker ("load this video / map") is no banner, also when it is a fixed lightbox.
-    if (/blocker|blocked|placeholder|embed|video|youtube|vimeo|opt-?out|\bmaps?\b/i.test(`${n.id} ${n.getAttribute("class") ?? ""}`)) return false;
+    if (/blocker|blocked|placeholder|embed|video|youtube|vimeo|\bmaps?\b/i.test(`${n.id} ${n.getAttribute("class") ?? ""}`)) return false;
     const position = getComputedStyle(n).position;
     if ((position === "fixed" || position === "sticky") && !pageShell(n)) return true;
     const role = n.getAttribute("role");
@@ -323,7 +325,7 @@ function markPlainControls(args: { source: string; flags: string; mark: string; 
   const inOverlay = (el: Element): boolean => {
     for (let n: Element | null = el; n; n = up(n)) {
       // A content blocker ("load this video / map") is no banner, also when it is a fixed lightbox.
-      if (/blocker|blocked|placeholder|embed|video|youtube|vimeo|opt-?out|\bmaps?\b/i.test(`${n.id} ${n.getAttribute("class") ?? ""}`)) return false;
+      if (/blocker|blocked|placeholder|embed|video|youtube|vimeo|\bmaps?\b/i.test(`${n.id} ${n.getAttribute("class") ?? ""}`)) return false;
       const position = getComputedStyle(n).position;
       if ((position === "fixed" || position === "sticky") && !pageShell(n)) return true;
       const role = n.getAttribute("role");
@@ -389,7 +391,7 @@ function overlayIndices(els: Element[], max: number): number[] {
   const inOverlay = (el: Element): boolean => {
     for (let n: Element | null = el; n; n = up(n)) {
       // A content blocker ("load this video / map") is no banner, also when it is a fixed lightbox.
-      if (/blocker|blocked|placeholder|embed|video|youtube|vimeo|opt-?out|\bmaps?\b/i.test(`${n.id} ${n.getAttribute("class") ?? ""}`)) return false;
+      if (/blocker|blocked|placeholder|embed|video|youtube|vimeo|\bmaps?\b/i.test(`${n.id} ${n.getAttribute("class") ?? ""}`)) return false;
       const position = getComputedStyle(n).position;
       if ((position === "fixed" || position === "sticky") && !pageShell(n)) return true;
       const role = n.getAttribute("role");
