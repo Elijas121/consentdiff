@@ -306,6 +306,7 @@ export function classifyRequests(
     if (u.protocol !== "http:" && u.protocol !== "https:") continue;
     // Floodlight and other DoubleClick endpoints carry parameters in the path (";gcs=G100;...").
     const gcs = u.searchParams.get("gcs") ?? u.pathname.match(/;gcs=(G1[01]{2})(;|$)/)?.[1] ?? null;
+    const tcf = u.searchParams.get("gdpr") === "1" && (u.searchParams.get("gdpr_consent") ?? "").length >= 8;
     const operator = sharedOperator(u.hostname, pageHost);
     const embeddedIn = embeddingHost(r.frameUrl, pageHost, firstParty);
     out.push({
@@ -316,6 +317,7 @@ export function classifyRequests(
       ...(operator ? { sameOperator: operator } : {}),
       ...(embeddedIn ? { embeddedIn } : {}),
       ...(gcs && /^G1[01]{2}$/.test(gcs) ? { consentSignal: gcs } : {}),
+      ...(tcf ? { tcfSignal: true as const } : {}),
     });
   }
   return out;
@@ -345,6 +347,9 @@ export function describeConsentSignal(gcs: string): string {
 }
 
 const isDeniedPing = (r: RequestRecord) => r.consentSignal === "G100";
+
+/** Rules for ad serving that honours the IAB TCF choice (non-personalised ads after a reject). */
+const TCF_AD_SERVING = new Set(["google-ads"]);
 
 /** " 3 of them come from inside an embedded frame (www.youtube-nocookie.com)." or nothing. */
 function embeddedNote(reqs: RequestRecord[]): string {
@@ -460,6 +465,10 @@ export function findingsForConsent(
   }
 
   if (reject?.clicked) {
+    // Ad requests that pass the recorded TCF choice on are usually the non-personalised ads a site may
+    // still show after a reject. Without tracker cookies set after the click that is disputed, not proven tracking.
+    const trackerCookieAfter = reject.cookiesAfter.some((c) => findingsForCookies([c]).some((f) => f.id.startsWith("tracker-cookie")));
+    const tcfOnly = (r: RequestRecord) => r.tcfSignal === true && !trackerCookieAfter;
     const byRule = new Map<string, { rule: TrackerRule; reqs: RequestRecord[] }>();
     for (const req of reject.requestsAfter) {
       if (!req.thirdParty) continue;
@@ -471,8 +480,21 @@ export function findingsForConsent(
     }
     for (const { rule, reqs } of byRule.values()) {
       const pings = reqs.filter(isDeniedPing);
-      const other = reqs.filter((r) => !isDeniedPing(r));
+      // Only ad serving: a pixel or an analytics hit is tracking, whatever consent string it carries.
+      // The frame that renders such an ad (Google's SafeFrame) carries no consent string of its own; it
+      // belongs to the TCF ad request that loaded it, so it is judged with it.
+      const tcfAds = TCF_AD_SERVING.has(rule.id) ? reqs.filter((r) => !isDeniedPing(r) && tcfOnly(r)) : [];
+      const tcf = tcfAds.length > 0 ? reqs.filter((r) => tcfAds.includes(r) || (!trackerCookieAfter && /(^|\.)safeframe\.googlesyndication\.com$/.test(r.host))) : [];
+      const other = reqs.filter((r) => !isDeniedPing(r) && !tcf.includes(r));
       const granted = other.filter((r) => r.consentSignal !== undefined);
+      if (tcf.length > 0) {
+        findings.push({
+          id: `tcf-ads-after-reject:${rule.id}`,
+          severity: "warn",
+          message: `${rule.name}: ${tcf.length} ad request(s) after reject pass the recorded consent choice on (IAB TCF gdpr=1 with a consent string), and no tracker cookie was set after the click. This is usually non-personalised advertising. It still sends data such as the IP address to the ad system; whether that is acceptable after a reject is disputed; decide deliberately.`,
+          evidence: uniq(tcf.map((r) => `${r.url} [TCF]`)).slice(0, MAX_EVIDENCE),
+        });
+      }
       if (other.length > 0) {
         findings.push({
           id: `third-party-after-reject:${rule.id}`,

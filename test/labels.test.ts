@@ -106,3 +106,13 @@ describe("wording found in the held-out sample", () => {
     }
   });
 });
+
+describe("wording found in the second held-out sample", () => {
+  it("knows the Spanish accept of a pay-or-consent wall, but never the subscribe option", () => {
+    for (const l of ["Acepto y continúo gratis", "Aceptar y continuar"]) {
+      expect(isAcceptLabel(l), l).toBe(true);
+      expect(CANDIDATE_LABEL.test(l), l).toBe(true);
+    }
+    for (const l of ["Rechazo y me suscribo", "Rechazar y suscribirse"]) expect(isRejectLabel(l), l).toBe(false);
+  });
+});

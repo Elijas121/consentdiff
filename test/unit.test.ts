@@ -527,11 +527,42 @@ describe("page-side overlay rules", () => {
       ["if (/blocker|blocked|", "return false;"],
       ['if ((position === "fixed" || position === "sticky")', "return true;"],
       ['if (role === "dialog" || role === "alertdialog"', "return true;"],
-      ['if (n.tagName !== "BODY" && n.tagName !== "HTML" && /cookie|consent|gdpr/', "return true;"],
+      ['if (n.tagName !== "BODY" && n.tagName !== "HTML" && /cookie|consent|gdpr|klaro|cmplz|borlabs|usercentrics/', "return true;"],
     ] as const) {
       const found = copies(start, end);
       expect(found, start).toHaveLength(3);
       expect(new Set(found).size, start).toBe(1);
     }
+  });
+});
+
+describe("privacy links in the languages whose banners are supported", () => {
+  it("finds Spanish, Dutch and Polish privacy links, and not look-alikes", () => {
+    for (const [href, text] of [
+      ["https://e.es/corporativo/politica-privacidad.html", "Política de privacidad"],
+      ["https://e.es/politica-de-privacidad", "Privacidad"],
+      ["https://e.nl/privacyverklaring", "Privacyverklaring"],
+      ["https://e.pl/polityka-prywatnosci", "Polityka prywatności"],
+    ] as const) {
+      expect(findLegalLinks([{ href, text, inFooter: true }]).privacy.found, text).toBe(true);
+    }
+    expect(findLegalLinks([{ href: "https://e.es/ofertas", text: "Ofertas", inFooter: true }]).privacy.found).toBe(false);
+  });
+});
+
+describe("TCF consent string on a request", () => {
+  it("is recorded only for gdpr=1 with a consent string, and the query is still dropped", () => {
+    const [a, b, c] = classifyRequests(
+      [
+        { url: "https://pagead2.googlesyndication.com/gampad/ads?gdpr=1&gdpr_consent=CQrJm4AQrJm4AAHABB&x=1", resourceType: "script" },
+        { url: "https://pagead2.googlesyndication.com/gampad/ads?gdpr=0&gdpr_consent=CQrJm4AQrJm4AAHABB", resourceType: "script" },
+        { url: "https://pagead2.googlesyndication.com/gampad/ads?gdpr=1", resourceType: "script" },
+      ],
+      "www.shop.example",
+    );
+    expect(a?.tcfSignal).toBe(true);
+    expect(a?.url).toBe("https://pagead2.googlesyndication.com/gampad/ads");
+    expect(b?.tcfSignal).toBeUndefined();
+    expect(c?.tcfSignal).toBeUndefined();
   });
 });

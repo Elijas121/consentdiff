@@ -31,6 +31,41 @@ describe("Consent Mode pings before consent", () => {
   });
 });
 
+describe("ad requests with a TCF consent string after reject", () => {
+  const tcf = (url: string): RequestRecord => ({ ...req(url), tcfSignal: true });
+  const test = (after: RequestRecord[], cookiesAfter: ConsentTest["reject"] extends infer R ? (R extends { cookiesAfter: infer C } ? C : never) : never = []): ConsentTest => ({
+    banner: { detected: true, rejectFound: true, acceptFound: true },
+    reject: { action: "reject", clicked: true, requestsAfter: after, cookiesBefore: [], cookiesAfter },
+  });
+
+  it("reports non-personalised ads that pass the recorded choice on as a disputed warning", () => {
+    const f = findingsForConsent(test([tcf("https://pagead2.googlesyndication.com/gampad/ads")]), []);
+    expect(f.find((x) => x.id.startsWith("third-party-after-reject"))).toBeUndefined();
+    expect(f.find((x) => x.id === "tcf-ads-after-reject:google-ads")?.severity).toBe("warn");
+  });
+
+  it("judges the frame that renders such an ad with its request, but not on its own", () => {
+    const frame = req("https://0050b2.safeframe.googlesyndication.com/safeframe/1-0-45/html/container.html");
+    const with_ = findingsForConsent(test([tcf("https://pagead2.googlesyndication.com/gampad/ads"), frame]), []);
+    expect(with_.find((x) => x.id === "third-party-after-reject:google-ads")).toBeUndefined();
+    expect(with_.find((x) => x.id === "tcf-ads-after-reject:google-ads")?.message).toContain("2 ad request(s)");
+    const alone = findingsForConsent(test([frame]), []);
+    expect(alone.find((x) => x.id === "third-party-after-reject:google-ads")?.severity).toBe("error");
+  });
+
+  it("keeps the error when a tracker cookie was set after the click", () => {
+    const f = findingsForConsent(test([tcf("https://pagead2.googlesyndication.com/gampad/ads")], [{ name: "_gcl_au", domain: "shop.example", thirdParty: false, expires: null, valueHash: "a" }]), []);
+    expect(f.find((x) => x.id === "third-party-after-reject:google-ads")?.severity).toBe("error");
+    expect(f.find((x) => x.id.startsWith("tcf-ads-after-reject"))).toBeUndefined();
+  });
+
+  it("never softens analytics or pixels, TCF string or not", () => {
+    const f = findingsForConsent(test([tcf("https://www.google-analytics.com/g/collect"), tcf("https://www.facebook.com/tr/")]), []);
+    expect(f.find((x) => x.id === "third-party-after-reject:google-analytics")?.severity).toBe("error");
+    expect(f.find((x) => x.id === "third-party-after-reject:meta-tr")?.severity).toBe("error");
+  });
+});
+
 describe("unknown hosts after reject", () => {
   const test = (after: RequestRecord[]): ConsentTest => ({
     banner: { detected: true, rejectFound: true, acceptFound: true },

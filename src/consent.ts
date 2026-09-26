@@ -82,7 +82,7 @@ const ACCEPT_STRICT: RegExp[] = [
   /^(j\s+accepte(\s+tout)?|tout\s+autoriser|autoriser\s+tous\s+les\s+cookies)$/,
   /^accett[ao](\s+tutt[oi])?(\s+i\s+cookie)?(\s+e\s+(chiudi|continua))?$/,
   /^consenti\s+tutt[oi]$/,
-  /^acept(ar|o)(\s+tod[oa]s?)?(\s+las\s+cookies)?(\s+y\s+(cerrar|continuar))?$/,
+  /^acept(ar|o)(\s+tod[oa]s?)?(\s+las\s+cookies)?(\s+y\s+(cerrar|continuar|contin[uú]o)(\s+gratis)?)?$/,
   /^permitir\s+todas?(\s+las\s+cookies)?$/,
   /^((alles|alle(\s+cookies)?)\s+)?accepteren(\s+en\s+(sluiten|doorgaan))?$/,
   /^(akkoord(\s+en\s+doorgaan)?|(alles|alle\s+cookies)\s+toestaan)$/,
@@ -141,7 +141,7 @@ const isOverlayElement = (el: Element): boolean => {
     const role = n.getAttribute("role");
     if (role === "dialog" || role === "alertdialog" || n.getAttribute("aria-modal") === "true" || n.tagName === "DIALOG") return true;
     // <html> and <body> often carry state classes such as "cookie-banner-open"; they name the page, not the banner.
-    if (n.tagName !== "BODY" && n.tagName !== "HTML" && /cookie|consent|gdpr/i.test(`${n.tagName} ${n.id} ${n.getAttribute("class") ?? ""}`)) {
+    if (n.tagName !== "BODY" && n.tagName !== "HTML" && /cookie|consent|gdpr|klaro|cmplz|borlabs|usercentrics/i.test(`${n.tagName} ${n.id} ${n.getAttribute("class") ?? ""}`)) {
       if (((n as HTMLElement).innerText || "").length < 4000) return true;
     }
   }
@@ -193,8 +193,11 @@ const hasConsentContext = (el: Element): boolean => {
   const labelWords = /cookie|consent|einwillig|tracking|datenschutz|privacy|privatsph/i;
   const gate = /\b(1[68]|21)\s*(jahre|years|\+)|mindestens\s+1[68]|volljährig|alter(s)?(prüfung|verifi|bestätigung)|age\s+verification|legal\s+(drinking\s+)?age|years\s+of\s+age|jugendschutz|\bagb\b|nutzungsbedingungen|geschäftsbedingungen|terms\s+(of\s+(use|service)|and\s+conditions)/i;
   const strong = /cookie|consent|einwillig|tracking|personalis|privatsph/i;
+  // Containers named by a consent tool (Klaro, Complianz, Borlabs, Usercentrics) are the prompt, whatever their text says.
+  const toolName = /cookie|consent|gdpr|klaro|cmplz|borlabs|usercentrics/i;
   let n: Element | null = up(el);
   for (let depth = 0; n && n.tagName !== "BODY" && depth < 16; depth += 1, n = up(n)) {
+    if (toolName.test(`${n.id} ${n.getAttribute("class") ?? ""}`)) return true;
     const text = deepText(n);
     const box = isOverlayBox(n);
     // A page-sized container is the page, not the prompt. An overlay may hold a long text (vendor lists).
@@ -326,7 +329,7 @@ function markPlainControls(args: { source: string; flags: string; mark: string; 
       const role = n.getAttribute("role");
       if (role === "dialog" || role === "alertdialog" || n.getAttribute("aria-modal") === "true" || n.tagName === "DIALOG") return true;
       // Same rule as isOverlayElement: a container the site names as its cookie or consent UI.
-      if (n.tagName !== "BODY" && n.tagName !== "HTML" && /cookie|consent|gdpr/i.test(`${n.tagName} ${n.id} ${n.getAttribute("class") ?? ""}`)) {
+      if (n.tagName !== "BODY" && n.tagName !== "HTML" && /cookie|consent|gdpr|klaro|cmplz|borlabs|usercentrics/i.test(`${n.tagName} ${n.id} ${n.getAttribute("class") ?? ""}`)) {
         if (((n as HTMLElement).innerText || "").length < 4000) return true;
       }
     }
@@ -391,7 +394,7 @@ function overlayIndices(els: Element[], max: number): number[] {
       if ((position === "fixed" || position === "sticky") && !pageShell(n)) return true;
       const role = n.getAttribute("role");
       if (role === "dialog" || role === "alertdialog" || n.getAttribute("aria-modal") === "true" || n.tagName === "DIALOG") return true;
-      if (n.tagName !== "BODY" && n.tagName !== "HTML" && /cookie|consent|gdpr/i.test(`${n.tagName} ${n.id} ${n.getAttribute("class") ?? ""}`)) {
+      if (n.tagName !== "BODY" && n.tagName !== "HTML" && /cookie|consent|gdpr|klaro|cmplz|borlabs|usercentrics/i.test(`${n.tagName} ${n.id} ${n.getAttribute("class") ?? ""}`)) {
         if (((n as HTMLElement).innerText || "").length < 4000) return true;
       }
     }

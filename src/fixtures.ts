@@ -295,6 +295,12 @@ export async function startFixtures(): Promise<Fixtures> {
       case "/access-denied":
         // A block page served with HTTP 200 instead of the site: not measurable.
         return html(200, `<!doctype html><html lang="de"><head><title>Zugriff verweigert / Access denied</title></head><body><h1>Zugriff verweigert</h1><p>Aus Sicherheitsgründen mussten wir den Zugriff verweigern.</p></body></html>`);
+      case "/banner-klaro-plain":
+        // A Klaro notice whose text names neither cookies nor consent ("personenbezogenen Informationen … Besucher-Statistiken").
+        return html(200, page(`<h1>Studio</h1>${FOOTER}<div id="klaro"><div class="klaro"><div class="cookie-notice" style="position:fixed;bottom:10px;right:10px;width:300px;background:#333;color:#fff;padding:1rem"><div class="cn-body"><p>Wir speichern und verarbeiten Ihre personenbezogenen Informationen für folgende Zwecke: Essenziell, Besucher-Statistiken.</p><p class="cn-ok"><button class="cm-btn cm-btn-danger">Ablehnen</button><button class="cm-btn cm-btn-success">OK</button><a class="cm-link" href="#">Anpassen...</a></p></div></div></div></div><script>document.querySelectorAll('.cn-ok button').forEach(function(b){b.addEventListener('click',function(){document.getElementById('klaro').remove();});});</script>`));
+      case "/newsletter-statistics":
+        // A newsletter prompt that mentions statistics and personal data: still no cookie decision.
+        return html(200, page(`<h1>Shop</h1>${FOOTER}<div role="dialog" style="position:fixed;top:0;left:30%;width:40%;background:#fff;padding:1rem"><p>Unser Newsletter mit Statistiken zum Markt. Ihre personenbezogenen Daten nutzen wir nur für den Versand.</p><button type="button">Ablehnen</button><button type="button">Zustimmen</button></div>`));
       case "/banner-many-links": {
         // A news page: many links whose text passes the cheap pre-filter come before the banner in the DOM.
         const teasers = Array.from({ length: 25 }, (_, i) => `<li><a href="/artikel-${i}">Zustimmung zur Reform ${i}</a></li>`).join("");

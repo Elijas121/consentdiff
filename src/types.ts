@@ -42,6 +42,11 @@ export interface RequestRecord {
    * analytics storage denied). Kept on its own because the query string is otherwise dropped.
    */
   consentSignal?: string;
+  /**
+   * The request carries an IAB TCF consent string (`gdpr=1` with a `gdpr_consent` value): the ad
+   * system is told the visitor's recorded choice. Kept on its own because the query is dropped.
+   */
+  tcfSignal?: true;
 }
 
 export interface CookieRecord {

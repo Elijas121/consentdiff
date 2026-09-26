@@ -271,7 +271,7 @@ describe("consent click test (real browser)", () => {
   });
 
   it("never clicks buttons of an app shell, a video lightbox or a newsletter prompt", async () => {
-    for (const path of ["/fixed-shell-form", "/video-lightbox", "/newsletter-prompt"]) {
+    for (const path of ["/fixed-shell-form", "/video-lightbox", "/newsletter-prompt", "/newsletter-statistics"]) {
       const r = await scan(`${fx.origin}${path}`, { ...opts(), bannerWaitMs: 800 });
       expect(r.consent?.banner, path).toMatchObject({ detected: false, rejectFound: false, acceptFound: false });
       expect(r.consent?.reject?.clicked, path).toBe(false);
@@ -311,6 +311,14 @@ describe("consent click test (real browser)", () => {
     expect(r.consent?.banner).toMatchObject({ detected: true, rejectFound: false, acceptFound: true });
     expect(r.consent?.accept?.control?.label).toBe("Akzeptieren");
     expect(r.consent?.accept?.clicked).toBe(true);
+  }, 30000);
+
+  it("finds a Klaro notice that names neither cookies nor consent", async () => {
+    const r = await scan(`${fx.origin}/banner-klaro-plain`, opts());
+    expect(r.consent?.banner).toMatchObject({ detected: true, rejectFound: true, acceptFound: true });
+    expect(r.consent?.reject?.control?.label).toBe("Ablehnen");
+    expect(r.consent?.accept?.control?.label).toBe("OK");
+    expect(r.consent?.reject?.clicked).toBe(true);
   }, 30000);
 
   it("never takes a push-notification prompt for a cookie banner", async () => {

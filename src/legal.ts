@@ -15,16 +15,17 @@ interface Kind {
   path: RegExp;
 }
 
-// German and English, plus the French and Italian wording of multilingual Swiss sites.
+// German and English, the French and Italian wording of multilingual Swiss sites, and the privacy wording
+// of Spanish, Dutch and Polish sites (the languages whose banner controls are known too).
 const IMPRINT: Kind = {
   label: /(^|[^\p{L}])(impressum|imprint|legal notice|anbieterkenn(ung|zeichnung)|offenlegung|mentions l[ée]gales|note legali)(?=$|[^\p{L}])/iu,
   exact: /^(impressum|imprint|legal notice|anbieterkenn(ung|zeichnung)|offenlegung|mentions l[ée]gales|note legali)$/iu,
   path: /\/(impressum|imprint|legal-notice|anbieterkenn(ung|zeichnung)|offenlegung|mentions-legales|note-legali)([/.\-_?#]|$)/i,
 };
 const PRIVACY: Kind = {
-  label: /(^|[^\p{L}])(datenschutz\p{L}*|privacy\p{L}*|data protection|protection des donn[ée]es|politique de confidentialit[ée]|confidentialit[ée]|informativa (sulla )?privacy|protezione dei dati)(?=$|[^\p{L}])/iu,
-  exact: /^(datenschutz(erklärung|erklaerung|hinweise|bestimmungen|richtlinie)?|privacy( policy| notice| statement)?|data protection( policy| notice)?|datenschutz (&|und) cookies|protection des donn[ée]es|politique de confidentialit[ée]|confidentialit[ée]|informativa (sulla )?privacy|protezione dei dati)$/iu,
-  path: /\/(datenschutz\w*|privacy\w*|data-protection|protection-des-donnees|confidentialite|politique-de-confidentialite|protezione-dei-dati)([/.\-_?#]|$)/i,
+  label: /(^|[^\p{L}])(datenschutz\p{L}*|privacy\p{L}*|data protection|protection des donn[ée]es|politique de confidentialit[ée]|confidentialit[ée]|informativa (sulla )?privacy|protezione dei dati|pol[ií]tica de privacidad|privacidad|protecci[oó]n de datos|privacyverklaring|privacybeleid|polityka prywatno[sś]ci)(?=$|[^\p{L}])/iu,
+  exact: /^(datenschutz(erklärung|erklaerung|hinweise|bestimmungen|richtlinie)?|privacy( policy| notice| statement)?|data protection( policy| notice)?|datenschutz (&|und) cookies|protection des donn[ée]es|politique de confidentialit[ée]|confidentialit[ée]|informativa (sulla )?privacy|protezione dei dati|pol[ií]tica de privacidad|privacidad|protecci[oó]n de datos|privacyverklaring|privacybeleid|polityka prywatno[sś]ci)$/iu,
+  path: /\/(datenschutz\w*|privacy\w*|data-protection|protection-des-donnees|confidentialite|politique-de-confidentialite|protezione-dei-dati|politica-de-privacidad|privacidad|proteccion-de-datos|privacyverklaring|polityka-prywatnosci)([/.\-_?#]|$)/i,
 };
 
 /** Sources of the exact labels, for the page-side search of scripted legal items (page code cannot import). */
