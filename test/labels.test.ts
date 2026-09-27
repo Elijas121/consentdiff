@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CANDIDATE_LABEL, isAcceptLabel, isOkLabel, isRejectLabel } from "../src/consent.js";
+import { CANDIDATE_LABEL, isAcceptLabel, isOkLabel, isRejectLabel, judgeAutoconsentClicks } from "../src/consent.js";
 
 describe("banner wording seen on large sites", () => {
   const accept = ["Geht klar", "Allen Zwecken zustimmen", "Allen zustimmen", "Allen Cookies zustimmen", "Alle Cookies zulassen", "Accept everything 🍪", "I Accept All"];
@@ -124,5 +124,18 @@ describe("wording found in the third held-out sample", () => {
       expect(CANDIDATE_LABEL.test(l), l).toBe(true);
     }
     for (const l of ["Notwendiges Update installieren", "Nie zgadzam się na newsletter"]) expect(isRejectLabel(l), l).toBe(false);
+  });
+});
+
+describe("autoconsent clicks", () => {
+  it("accepts a reject through settings, but never an accept, a dismissal or a subscription", () => {
+    expect(judgeAutoconsentClicks("reject", ["Einstellungen", "Speichern"])).toBeUndefined();
+    expect(judgeAutoconsentClicks("reject", [])).toBeUndefined();
+    expect(judgeAutoconsentClicks("reject", ["OK"])).toBe("OK");
+    expect(judgeAutoconsentClicks("reject", ["Alle akzeptieren"])).toBe("Alle akzeptieren");
+    expect(judgeAutoconsentClicks("reject", ["Rifiuta e abbonati"])).toBe("Rifiuta e abbonati");
+    expect(judgeAutoconsentClicks("accept", ["Alle akzeptieren"])).toBeUndefined();
+    expect(judgeAutoconsentClicks("accept", ["Ok"])).toBe("Ok");
+    expect(judgeAutoconsentClicks("accept", ["Jetzt abonnieren"])).toBe("Jetzt abonnieren");
   });
 });

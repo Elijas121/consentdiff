@@ -316,6 +316,9 @@ export async function startFixtures(): Promise<Fixtures> {
           document.getElementById('tc-reject').onclick = function(){ box.remove(); };
           document.getElementById('tc-accept').onclick = function(){ box.remove(); var s = document.createElement('script'); s.src = '${thirdOrigin}/analytics.js'; document.head.appendChild(s); };
         </script>`));
+      case "/notice-ok-autoconsent":
+        // A pure notice with a single "OK": there is nothing to reject. A rule may still "opt out" by clicking OK.
+        return html(200, page(`<h1>Kanzlei</h1>${FOOTER}<div id="testnotice" style="position:fixed;bottom:0;left:0;width:300px;background:#fff;padding:1rem">Wir verwenden Cookies. Mit Nutzung dieser Website stimmen Sie zu. <a id="tn-ok" role="button">OK</a></div><script>document.getElementById('tn-ok').onclick=function(){document.getElementById('testnotice').remove();};</script>`));
       case "/banner-many-links": {
         // A news page: many links whose text passes the cheap pre-filter come before the banner in the DOM.
         const teasers = Array.from({ length: 25 }, (_, i) => `<li><a href="/artikel-${i}">Zustimmung zur Reform ${i}</a></li>`).join("");

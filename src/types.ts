@@ -107,6 +107,8 @@ export interface ConsentSession {
   action: "reject" | "accept";
   clicked: boolean;
   control?: ConsentControl;
+  /** Labels of the elements autoconsent clicked, when it answered this visit (evidence). */
+  autoconsentClicks?: string[];
   /** Only requests made after the click. */
   requestsAfter: RequestRecord[];
   /** Cookies right before the click, to tell new cookies from ones that were already there. */

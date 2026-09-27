@@ -290,6 +290,25 @@ async function searchableFrames(page: Page, q: QueryBudget): Promise<Frame[]> {
   return out;
 }
 
+/**
+ * Why the clicks autoconsent made are no valid answer for this visit, or undefined when they are.
+ * A reject may pass through settings ("Einstellungen", "Speichern"), but never click an accept, a bare
+ * OK / close, or a subscribe option. An accept must not be a bare dismissal of a notice.
+ */
+const plainLabel = (l: string) => l.replace(/[\u0000-\u001F\u007F-\u009F\u2028\u2029\u202A-\u202E\u2066-\u2069]/g, " ").trim();
+
+export function judgeAutoconsentClicks(action: "reject" | "accept", labels: string[]): string | undefined {
+  const subscribe = /abbon|subscri|suscri|abonn|\babo\b|\bpur\b/i;
+  const dismiss = (l: string) => isOkLabel(l) || /^(close|schlie(ß|ss)en|verstanden|got it|ok,? got it|x|×)$/i.test(normalizeLabel(l) || l.trim());
+  for (const label of labels) {
+    if (!label) continue;
+    if (subscribe.test(label)) return label;
+    if (action === "reject" && (isAcceptLabel(label) || dismiss(label))) return label;
+  }
+  if (action === "accept" && labels.length > 0 && labels.every((l) => !l || dismiss(l))) return labels.find(Boolean) ?? "";
+  return undefined;
+}
+
 async function bySelector(page: Page, selector: string, q: QueryBudget): Promise<Found | undefined> {
   for (const frame of await searchableFrames(page, q)) {
     const locator = frame.locator(selector).first();
@@ -612,11 +631,25 @@ export async function runConsentSession(
     // a screenshot is taken. Armed only right before our own click.
     let armed = false;
     let clickMarker: number | undefined;
-    await context.exposeBinding("__consentprobeMark", () => {
-      if (armed && clickMarker === undefined) clickMarker = raw.length;
+    // Labels of the elements clicked while armed: autoconsent's clicks are judged by the same rules.
+    const clickedLabels: string[] = [];
+    const hiddenClicks: string[] = [];
+    await context.exposeBinding("__consentprobeMark", (_source: unknown, type: unknown, label: unknown, visible: unknown) => {
+      if (!armed) return;
+      if (clickMarker === undefined) clickMarker = raw.length;
+      if (type === "click" && typeof label === "string") {
+        clickedLabels.push(label.slice(0, 80));
+        if (visible === false) hiddenClicks.push(label.slice(0, 80));
+      }
     });
     await context.addInitScript(() => {
-      const mark = () => (window as unknown as { __consentprobeMark?: () => void }).__consentprobeMark?.();
+      const mark = (e: Event) => {
+        const t = e.target instanceof Element ? (e.target.closest("button, a, [role='button'], input, label") ?? e.target) : null;
+        const label = t ? ((t as HTMLElement).innerText || (t as HTMLInputElement).value || t.getAttribute("aria-label") || "").replace(/\s+/g, " ").trim() : "";
+        const r = t ? t.getBoundingClientRect() : null;
+        const visible = !!t && !!r && r.width > 0 && r.height > 0 && getComputedStyle(t).visibility !== "hidden";
+        (window as unknown as { __consentprobeMark?: (type: string, label: string, visible: boolean) => void }).__consentprobeMark?.(e.type, label, visible);
+      };
       // "click" too: autoconsent clicks from a page script, which fires no pointerdown.
       for (const type of ["pointerdown", "mousedown", "click"]) document.addEventListener(type, mark, { capture: true });
     });
@@ -663,7 +696,25 @@ export async function runConsentSession(
         banner.incomplete = undefined;
         banner.overlayHint = undefined;
       }
-      if (run.cmp && run.done && !run.navigatedAway) {
+      // autoconsent answers a pure notice ("OK") as an opt-out and may take a "reject and subscribe"
+      // button. Its clicks must pass the same rules as consentprobe's own: nothing that accepts,
+      // dismisses a notice or subscribes counts as a reject, and a bare dismissal is no accept.
+      // Only an answer a visitor could give counts: at least one click, and no click on a hidden element.
+      // An answer through the consent tool's own script (no click) reaches a state no visitor can reach.
+      const wrong = judgeAutoconsentClicks(action, clickedLabels);
+      const verdict =
+        clickedLabels.length === 0
+          ? "it clicked no visible control (it used the consent tool's script)"
+          : hiddenClicks.length > 0
+            ? `it clicked a hidden element ("${hiddenClicks[0]}")`
+            : wrong !== undefined
+              ? `it clicked "${wrong}"`
+              : undefined;
+      if (clickedLabels.length > 0) session.autoconsentClicks = clickedLabels.map((l) => plainLabel(l)).slice(0, 10);
+      if (run.cmp && run.done && !run.navigatedAway && verdict) {
+        session.error = `autoconsent's answer not used: ${verdict}`;
+      }
+      if (run.cmp && run.done && !run.navigatedAway && !verdict) {
         session.control = { label: `${run.cmp} (answered by autoconsent)`, method: "autoconsent" };
         session.clicked = true;
         await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => undefined);
@@ -673,7 +724,7 @@ export async function runConsentSession(
         session.cookiesAfter = classifyCookies(await context.cookies(), pageHost, o.firstParty);
         return { banner, session };
       }
-      if (run.cmp) session.error = run.navigatedAway ? "autoconsent left the site while answering the banner; not tested" : `autoconsent recognized ${run.cmp} but could not answer it`;
+      if (run.cmp && !session.error) session.error = run.navigatedAway ? "autoconsent left the site while answering the banner; not tested" : `autoconsent recognized ${run.cmp} but could not answer it`;
       session.cookiesBefore = [];
       clickMarker = undefined;
     }

@@ -412,6 +412,55 @@ describe("second engine: autoconsent", () => {
     expect(r.consent?.accept?.control?.label).toBe("Zustimmen");
   }, 60000);
 
+  it("never counts a dismissed notice as a reject or an accept", async () => {
+    const noticeRules = JSON.stringify({
+      autoconsent: [
+        {
+          name: "test-notice",
+          detectCmp: [{ exists: "#testnotice" }],
+          detectPopup: [{ visible: "#testnotice" }],
+          optIn: [{ waitForThenClick: "#tn-ok" }],
+          optOut: [{ waitForThenClick: "#tn-ok" }],
+        },
+      ],
+    });
+    const r = await scan(`${fx2.origin}/notice-ok-autoconsent`, { ...o, autoconsentRules: noticeRules });
+    expect(r.consent?.reject?.clicked).toBe(false);
+    expect(r.consent?.accept?.clicked).toBe(false);
+    expect(r.consent?.reject?.error).toMatch(/not used: it clicked "OK"/);
+  }, 60000);
+
+  it("never counts an answer through a hidden element or without any click", async () => {
+    const hidden = JSON.stringify({
+      autoconsent: [
+        {
+          name: "test-hidden",
+          detectCmp: [{ exists: "#testcmp" }],
+          detectPopup: [{ visible: "#testcmp" }],
+          optIn: [{ waitForThenClick: "#tc-accept" }],
+          optOut: [{ click: "#tc-reject" }],
+        },
+      ],
+    });
+    const r = await scan(`${fx2.origin}/banner-reject-in-settings`, { ...o, autoconsentRules: hidden });
+    expect(r.consent?.reject?.clicked).toBe(false);
+    expect(r.consent?.reject?.error).toMatch(/hidden element/);
+    const script = JSON.stringify({
+      autoconsent: [
+        {
+          name: "test-script",
+          detectCmp: [{ exists: "#testcmp" }],
+          detectPopup: [{ visible: "#testcmp" }],
+          optIn: [{ waitForThenClick: "#tc-accept" }],
+          optOut: [{ hide: "#testcmp" }],
+        },
+      ],
+    });
+    const s = await scan(`${fx2.origin}/banner-reject-in-settings`, { ...o, autoconsentRules: script });
+    expect(s.consent?.reject?.clicked).toBe(false);
+    expect(s.consent?.reject?.error).toMatch(/no visible control/);
+  }, 60000);
+
   it("is not used when switched off", async () => {
     const r = await scan(`${fx2.origin}/banner-reject-in-settings`, { ...o, autoconsent: false });
     expect(r.consent?.reject?.clicked).toBe(false);
