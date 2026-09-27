@@ -407,7 +407,7 @@ describe("report and errors", () => {
   });
   it("explains a missing browser in one actionable line", () => {
     const err = explainLaunchError(new Error("browserType.launch: Executable doesn't exist at /x. Please run: npx playwright install"));
-    expect(err.message).toBe("The bundled Chromium is not installed yet. Install it once with: consentprobe --install-browser");
+    expect(err.message).toBe("The bundled Chromium is not installed yet. Install it once with: npx consentprobe --install-browser");
     expect(explainLaunchError(new Error("browserType.launch: Chromium distribution 'chrome' is not found at /opt/google/chrome/chrome")).message).toMatch(/Google Chrome is not installed/);
     expect(explainLaunchError(new Error("browserType.launch: Host system is missing dependencies to run browsers.")).message).toMatch(/--with-deps/);
     expect(explainLaunchError(new Error("boom")).message).toBe("boom");

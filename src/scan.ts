@@ -107,7 +107,7 @@ export function explainLaunchError(err: unknown): Error {
     return new SetupError("Chromium could not start because system libraries are missing. On Linux run once, with root rights: consentprobe --install-browser --with-deps");
   }
   if (/executable doesn't exist/i.test(message)) {
-    return new SetupError("The bundled Chromium is not installed yet. Install it once with: consentprobe --install-browser");
+    return new SetupError("The bundled Chromium is not installed yet. Install it once with: npx consentprobe --install-browser");
   }
   return new SetupError(message);
 }

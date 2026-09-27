@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.5 (2026-09-27)
+
+- When the browser is missing, the hint now reads `npx consentprobe --install-browser`, which works for npx, global and library installs alike. 0.1.4 said `consentprobe --install-browser`, which fails with "command not found" after `npx consentprobe`.
+
 ## 0.1.4 (2026-09-27)
 
 - Google reCAPTCHA before any consent interaction is now a warning instead of info, like maps, video and chat widgets. It analyses the visitor's device and behaviour on Google's servers, and loading it on every page is a common setup; an Austrian court (BVwG, 13 September 2024, W298 2274626-1) held that reCAPTCHA v3 needs consent. Other captchas (hCaptcha …) stay info. With the default `--fail-on error` this does not fail a CI job.
