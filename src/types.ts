@@ -72,7 +72,9 @@ export interface LegalLink {
   /** The page has no links at all (a splash page or script-built navigation): absence proves nothing. */
   noLinksOnPage?: boolean;
   /** Further confident matches, tried when the first one is broken (internal; removed from the result). */
-  alternatives?: string[];
+  alternatives?: { href: string; text: string }[];
+  /** A matching link on the site's own domain that is gone (404/410) while `href` works: still a broken link for visitors. */
+  brokenOwnLink?: { href: string; text: string; status: number };
 }
 
 export interface Finding {

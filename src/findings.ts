@@ -273,6 +273,14 @@ export function findingsForLegal(
         evidence: link.href ? [link.href] : [],
       });
     }
+    if (link.brokenOwnLink && link.status !== undefined && link.status < 400) {
+      findings.push({
+        id: `${key}-link-partly-broken`,
+        severity: "warn",
+        message: `A second link to the ${label} on the site's own domain does not resolve (HTTP ${link.brokenOwnLink.status}, "${link.brokenOwnLink.text}"). The ${label} itself is reachable through another link.`,
+        evidence: [link.brokenOwnLink.href, ...(link.href ? [link.href] : [])],
+      });
+    }
     if (link.inFooter === false) {
       findings.push({
         id: `${key}-link-not-in-footer`,

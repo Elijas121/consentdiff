@@ -585,6 +585,6 @@ describe("choosing among several legal links", () => {
       "www.shop.example",
     ).privacy;
     expect(r.href).toBe("https://www.shop.example/datenschutz");
-    expect(r.alternatives).toEqual(["https://www.webagentur.example/datenschutz.html"]);
+    expect(r.alternatives).toEqual([{ href: "https://www.webagentur.example/datenschutz.html", text: "Datenschutzerklärung" }]);
   });
 });

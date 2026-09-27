@@ -17,7 +17,7 @@ import {
   findingsForRequests,
   type ImprintMode,
 } from "./findings.js";
-import { EXACT_LEGAL_LABELS, findLegalLinks, type RawAnchor } from "./legal.js";
+import { EXACT_LEGAL_LABELS, findLegalLinks, siteOf, type RawAnchor } from "./legal.js";
 import { recordRequests, type RawRequest } from "./record.js";
 import { PLAYWRIGHT_VERSION, VERSION } from "./version.js";
 import type {
@@ -324,11 +324,15 @@ async function runBaseline(
         const local = isLocalHost(typedHost) ? typedHost : undefined;
         link.status = await checkLink(context, link.href, timeoutMs, 1500, local);
         // A broken first choice is not "the privacy link is broken" while another matching link works.
+        // A broken one on the site's own domain is still a dead link for visitors and is kept for a
+        // warning; one elsewhere (a web agency's credit link) is not the site's legal page and is dropped.
         for (const alt of link.alternatives ?? []) {
           if (link.status === undefined || link.status < 400) break;
-          const status = await checkLink(context, alt, timeoutMs, 1500, local);
+          const status = await checkLink(context, alt.href, timeoutMs, 1500, local);
           if (status !== undefined && status < 400) {
-            link.href = alt;
+            if (siteOf(link.href) === siteOf(page.url())) link.brokenOwnLink = { href: link.href, text: link.text ?? "", status: link.status };
+            link.href = alt.href;
+            link.text = alt.text;
             link.status = status;
           }
         }

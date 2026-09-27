@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 (2026-09-27)
+
+- New warning `imprint-link-partly-broken` / `privacy-link-partly-broken`: a legal link on the site's own domain returns 404 or 410 while another matching link works. 0.1.2 reported nothing in this case, although visitors who click the dead link land on an error page. A dead link on another domain (a web agency's credit link) is still ignored.
+- When a working second link replaces a broken first one, the report now shows that link's own text (0.1.2 kept the text of the broken one).
+- README: a single scan is a sample; sites whose tags race their consent tool can differ between visits, so scan twice before signing a site off.
+- Found by running the published 0.1.2 package against the 306-site regression list after release.
+
 ## 0.1.2 (2026-09-27)
 
 No change to what the scanner measures or reports.

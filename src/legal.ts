@@ -86,7 +86,7 @@ function pick(anchors: RawAnchor[], kind: Kind): { best?: RawAnchor; weak?: RawA
  * element counts only when no real link was found and its whole text is the standard wording.
  */
 /** Registrable-ish host: the last two labels (enough to tell the site's own links from a web agency's). */
-const siteOf = (href: string): string => {
+export const siteOf = (href: string): string => {
   try {
     return new URL(href).hostname.split(".").slice(-2).join(".");
   } catch {
@@ -111,7 +111,12 @@ export function findLegalLinks(anchors: RawAnchor[], pageHost = ""): { imprint: 
     const { weak } = pick(real, kind);
     const best = confident[0]?.a;
     if (best) {
-      const alternatives = [...new Set(confident.slice(1).map((x) => x.a.href).filter((h) => h && h !== best.href))].slice(0, 3);
+      const seen = new Set([best.href]);
+      const alternatives = confident
+        .slice(1)
+        .filter((x) => x.a.href && !seen.has(x.a.href) && seen.add(x.a.href))
+        .slice(0, 3)
+        .map((x) => ({ href: x.a.href, text: x.a.text }));
       return { found: true, href: best.href, text: best.text, inFooter: best.inFooter, ...(alternatives.length ? { alternatives } : {}) };
     }
     const byScript = scripted.find((a) => kind.exact.test(a.text.replace(/\s+/g, " ").replace(/[.:]+$/, "").trim()));

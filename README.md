@@ -12,7 +12,7 @@ Measure what a website does before and after a visitor answers the cookie banner
 
 It reports technical findings with evidence. It gives no legal advice and does not decide whether a law is violated.
 
-> Status: early (0.1.2), [on npm](https://www.npmjs.com/package/consentprobe). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+> Status: early (0.1.3), [on npm](https://www.npmjs.com/package/consentprobe). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## Why another scanner?
 
@@ -25,7 +25,7 @@ A local test page whose banner ignores the reject click (not a real site). Run i
 ![consentprobe run against a local test page: the banner's reject click is ignored and tracking continues](docs/demo.gif)
 
 ```
-consentprobe 0.1.2  http://localhost:PORT/banner-bad
+consentprobe 0.1.3  http://localhost:PORT/banner-bad
 Phase: before-consent (no interaction with any cookie banner), then reject and accept visits
 Consent banner: recognized | reject: found ("Alle ablehnen") | accept: found ("Alle akzeptieren")
 2 error, 0 warn, 1 info | before consent: 0 third-party host(s), 1 request(s), 0 cookie(s)
@@ -52,6 +52,7 @@ Technical findings only. This is not legal advice and does not assess whether a 
 | An accept control, but no general reject control on the first layer | warn |
 | Imprint (Impressum) link missing or returning 404/410 | error on `.de`, `.at`, `.ch`, `.li` domains, warn on other German-language sites |
 | Privacy policy link missing or returning 404/410 | error on German sites, warn elsewhere |
+| A second imprint or privacy link on the site's own domain returning 404/410 while another one works | warn |
 | A legal link that only weakly matches (shown as a candidate to check, e.g. a lone "Kontakt") | warn |
 | Unknown third parties that appear only after the reject click | info |
 | Services of the site's own company (Google Fonts on youtube.com), what accepting loads, unclassified third parties, consent-platform and Cloudflare cookies | info |
@@ -127,7 +128,7 @@ Categories: `analytics`, `advertising`, `tag-manager`, `social`, `fonts`, `maps`
 `action.yml` is a composite GitHub Action. It installs the tool, scans the URL and writes the Markdown report into the job summary; if the page cannot be measured, the summary says why. In a public repository the job summary is public, so point it only at sites you own or are authorized to test:
 
 ```yaml
-- uses: Elijas121/consentprobe@v0.1.2   # or the release's commit SHA, which cannot be moved
+- uses: Elijas121/consentprobe@v0.1.3   # or the release's commit SHA, which cannot be moved
   with:
     url: https://staging.example.de
     fail-on: error
@@ -170,6 +171,7 @@ Then ask, for example, "check example.de for tracking before consent". Other age
 - **Location.** A banner may not appear from your IP address (some sites show one only in the EU), and a site may behave differently there. "No banner recognized" does not mean the site has none.
 - **Browser identity.** Headless Chromium calls itself "HeadlessChrome", and many large sites then hide their banner and behave differently. `consentprobe` therefore presents itself like the same Chromium in a normal window (user agent, client hints, German language). It does not hide that the browser is automated (`navigator.webdriver` stays `true`), and a site that answers with a bot check or HTTP 403 is not measured.
 - **First layer only.** Choices behind "Settings" are not explored. A site that redirects to a separate full-page consent page is tested on that page; its legal links are not judged there.
+- **One visit is a sample.** Some sites race their tags against their consent tool and set tracking cookies on one visit but not on the next. Before you sign a site off, scan it at least twice; a finding that shows up once is real for that visit.
 - **One page per run.** No crawling; a password-protected test site works with credentials in the URL (they are sent only to that origin).
 - **Two engines.** consentprobe first looks for the controls itself (known consent-tool selectors, whole labels in seven languages). When it finds none, it asks [DuckDuckGo's autoconsent](https://github.com/duckduckgo/autoconsent) (MPL-2.0, rules for several hundred consent tools). Its answer counts only when it clicked visible controls a visitor could click (never a bare OK, a hidden element, an accept or a subscribe option, and never an answer through the consent tool's script alone). autoconsent may reject through a settings layer; the report says so ("not on the first layer, answered by autoconsent") and keeps the warning that the first layer has no reject control.
 - **Wording.** Controls are matched by known consent-platform selectors and by whole labels in German, English, French, Italian, Spanish, Dutch and Polish, only inside an overlay or a container the site names as its cookie banner, and only when that overlay talks about cookies, consent or privacy. Unusual wording is reported as "not found", never guessed.

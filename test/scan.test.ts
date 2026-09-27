@@ -117,11 +117,20 @@ describe("scan (real browser)", () => {
     expect(ids(none)).not.toContain("imprint-link-missing");
   }, 30000);
 
-  it("reports a privacy link as broken only when no other matching link works", async () => {
+  it("reports a privacy link as unreachable only when no other matching link works, but warns about a dead one on the own domain", async () => {
     const r = await scan(`${fx.origin}/two-privacy-links`, opts());
-    expect(r.legal.privacy).toMatchObject({ found: true, href: `${fx.origin}/datenschutz`, status: 200 });
+    expect(r.legal.privacy).toMatchObject({ found: true, href: `${fx.origin}/datenschutz`, text: "Datenschutzerklärung", status: 200 });
     expect(ids(r)).not.toContain("privacy-link-unreachable");
+    const partly = r.findings.find((f) => f.id === "privacy-link-partly-broken");
+    expect(partly?.severity).toBe("warn");
+    expect(partly?.evidence).toEqual([`${fx.origin}/datenschutz-alt`, `${fx.origin}/datenschutz`]);
     expect(JSON.stringify(r.legal)).not.toContain("alternatives");
+  });
+
+  it("does not warn about a dead legal link on another domain (a web agency's credit link)", async () => {
+    const r = await scan(`${fx.origin}/agency-privacy-link`, opts());
+    expect(r.legal.privacy).toMatchObject({ found: true, href: `${fx.origin}/datenschutz`, status: 200 });
+    expect(ids(r).filter((i) => i.startsWith("privacy-"))).toEqual([]);
   });
 
   it("does not count cookies that its own legal-link check received", async () => {

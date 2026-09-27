@@ -46,7 +46,7 @@ The JSON has `findings[]` (`id`, `severity`, `message`, `evidence[]`), `consent.
 | `tracker-cookies-not-removed-after-reject` | Tracker cookies from before the click are still there, unchanged | Context: the before-consent findings are the real issue |
 | `no-reject-control-on-first-layer` | Accept found, no general reject on the first layer | Add an equally prominent reject control, or explain the flow |
 | `reject-search-incomplete` | Accept found, but parts of the page did not respond while searching for a reject control | Say that it is unknown whether there is one |
-| `imprint-*`, `privacy-*` | Legal page link missing, broken, uncertain (e.g. hidden in a menu) or not verifiable | Add or fix the footer link |
+| `imprint-*`, `privacy-*` | Legal page link missing, broken, uncertain (e.g. hidden in a menu) or not verifiable; `*-link-partly-broken`: one of two own links is dead while the other works | Add or fix the footer link |
 | `consent-detection-incomplete` | Parts of the page did not respond, so the banner search is incomplete | Say so; do not claim there is no banner |
 | `consent-wall-page` | The first visit was redirected to a separate consent page; legal links were not judged, its consent choice was tested like a banner | Say that the imprint and privacy links of the site behind the wall were not checked |
 | `consent-reject-not-tested`, `consent-accept-not-tested` | The control appeared in one visit only | Say which click was not tested; suggest a rerun with a longer `--banner-wait` |
@@ -59,6 +59,6 @@ The JSON has `findings[]` (`id`, `severity`, `message`, `evidence[]`), `consent.
 
 1. **Verify before you accuse.** For any "after reject" finding, open the evidence screenshots (`reject-1-before-click.png`, `reject-2-after-click.png`) and confirm the clicked control really was the general reject. If not, say the finding is unreliable. `baseline.png` shows the page before anything happened; a banner that renders late is only on `baseline-2-after-banner-wait.png`.
 2. **No legal conclusions.** Say "the scan measured X", never "this violates the GDPR". Recommend a legal review for anything that matters.
-3. **Say what was not tested:** banners can depend on location, only the first banner layer is tested, one page per run, and the tracker list is hand-curated and incomplete.
+3. **Say what was not tested:** banners can depend on location, only the first banner layer is tested, one page per run, and the tracker list is hand-curated and incomplete. One visit is a sample: before calling a site clean, run the scan a second time; some sites set tracking cookies on one visit and not on the next.
 4. **Group the fixes** by effort: quick wins (self-host Google Fonts, fix footer links) before consent-tool configuration.
 5. If the banner was "not recognized", say so plainly. It does not mean there is none.
