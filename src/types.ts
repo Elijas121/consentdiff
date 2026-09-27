@@ -71,6 +71,8 @@ export interface LegalLink {
   scripted?: boolean;
   /** The page has no links at all (a splash page or script-built navigation): absence proves nothing. */
   noLinksOnPage?: boolean;
+  /** Further confident matches, tried when the first one is broken (internal; removed from the result). */
+  alternatives?: string[];
 }
 
 export interface Finding {

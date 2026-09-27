@@ -330,6 +330,9 @@ export async function startFixtures(): Promise<Fixtures> {
       case "/no-links":
         // A splash page with no links at all: navigation is built by a script.
         return html(200, page(`<h1>Fahrschule</h1><div onclick="location.href='/start'" style="cursor:pointer">Weiter</div>`));
+      case "/two-privacy-links":
+        // Two privacy links in the footer; the first one is gone (404), the second one works.
+        return html(200, page(`<h1>Shop</h1><footer><a href="/impressum">Impressum</a> <a href="/datenschutz-alt">Datenschutzerklärung</a> <a href="/datenschutz">Datenschutzerklärung</a></footer>`));
       case "/banner-many-links": {
         // A news page: many links whose text passes the cheap pre-filter come before the banner in the DOM.
         const teasers = Array.from({ length: 25 }, (_, i) => `<li><a href="/artikel-${i}">Zustimmung zur Reform ${i}</a></li>`).join("");

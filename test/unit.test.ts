@@ -574,3 +574,17 @@ describe("long footer labels", () => {
     expect(findLegalLinks([{ href: "https://e.at/artikel-9", text: "Neue Regel zum Datenschutz: was sich ändert und warum", inFooter: true }]).privacy.found).toBe(false);
   });
 });
+
+describe("choosing among several legal links", () => {
+  it("prefers the site's own link over a web agency's credit link and keeps the others as alternatives", () => {
+    const r = findLegalLinks(
+      [
+        { href: "https://www.webagentur.example/datenschutz.html", text: "Datenschutzerklärung", inFooter: true },
+        { href: "https://www.shop.example/datenschutz", text: "Datenschutz", inFooter: true },
+      ],
+      "www.shop.example",
+    ).privacy;
+    expect(r.href).toBe("https://www.shop.example/datenschutz");
+    expect(r.alternatives).toEqual(["https://www.webagentur.example/datenschutz.html"]);
+  });
+});

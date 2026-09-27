@@ -309,7 +309,7 @@ async function runBaseline(
       throw new PageUnresponsiveError();
     });
     const lang = await bounded(page.evaluate(() => document.documentElement.lang || ""), 5000, () => "");
-    const legal = findLegalLinks(anchors);
+    const legal = findLegalLinks(anchors, new URL(page.url()).hostname);
     if (anchors.length === 0) {
       legal.imprint.noLinksOnPage = true;
       legal.privacy.noLinksOnPage = true;
@@ -320,7 +320,20 @@ async function runBaseline(
     // only the typed host itself: a redirect from it to another local address stays blocked.
     const typedHost = new URL(url).hostname;
     for (const link of [legal.imprint, legal.privacy] as LegalLink[]) {
-      if (link.found && link.href) link.status = await checkLink(context, link.href, timeoutMs, 1500, isLocalHost(typedHost) ? typedHost : undefined);
+      if (link.found && link.href) {
+        const local = isLocalHost(typedHost) ? typedHost : undefined;
+        link.status = await checkLink(context, link.href, timeoutMs, 1500, local);
+        // A broken first choice is not "the privacy link is broken" while another matching link works.
+        for (const alt of link.alternatives ?? []) {
+          if (link.status === undefined || link.status < 400) break;
+          const status = await checkLink(context, alt, timeoutMs, 1500, local);
+          if (status !== undefined && status < 400) {
+            link.href = alt;
+            link.status = status;
+          }
+        }
+      }
+      delete link.alternatives;
     }
 
     const measured = {

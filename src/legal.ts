@@ -85,12 +85,35 @@ function pick(anchors: RawAnchor[], kind: Kind): { best?: RawAnchor; weak?: RawA
  * Pure selection step; HTTP status is added by the scanner afterwards. Real links win. A scripted
  * element counts only when no real link was found and its whole text is the standard wording.
  */
-export function findLegalLinks(anchors: RawAnchor[]): { imprint: LegalLink; privacy: LegalLink } {
+/** Registrable-ish host: the last two labels (enough to tell the site's own links from a web agency's). */
+const siteOf = (href: string): string => {
+  try {
+    return new URL(href).hostname.split(".").slice(-2).join(".");
+  } catch {
+    return "";
+  }
+};
+
+/**
+ * `pageHost`: the site's own links are preferred over equally good links elsewhere (a web agency's
+ * credit link "Datenschutzerklärung" in the footer). Further confident matches are kept as
+ * `alternatives`, so a broken first choice is not reported while another link works.
+ */
+export function findLegalLinks(anchors: RawAnchor[], pageHost = ""): { imprint: LegalLink; privacy: LegalLink } {
   const real = anchors.filter((a) => !a.scripted);
   const scripted = anchors.filter((a) => a.scripted);
+  const own = siteOf(`https://${pageHost}/`);
   const resolve = (kind: Kind): LegalLink => {
-    const { best, weak } = pick(real, kind);
-    if (best) return { found: true, href: best.href, text: best.text, inFooter: best.inFooter };
+    const confident = real
+      .map((a, i) => ({ a, i, s: score(a, kind) + (pageHost && siteOf(a.href) === own ? 1 : 0) }))
+      .filter((x) => x.s >= MIN_SCORE)
+      .sort((x, y) => y.s - x.s || x.i - y.i);
+    const { weak } = pick(real, kind);
+    const best = confident[0]?.a;
+    if (best) {
+      const alternatives = [...new Set(confident.slice(1).map((x) => x.a.href).filter((h) => h && h !== best.href))].slice(0, 3);
+      return { found: true, href: best.href, text: best.text, inFooter: best.inFooter, ...(alternatives.length ? { alternatives } : {}) };
+    }
     const byScript = scripted.find((a) => kind.exact.test(a.text.replace(/\s+/g, " ").replace(/[.:]+$/, "").trim()));
     if (byScript) return { found: true, text: byScript.text, inFooter: byScript.inFooter, scripted: true };
     if (weak) return { found: false, candidate: { href: weak.href, text: weak.text } };

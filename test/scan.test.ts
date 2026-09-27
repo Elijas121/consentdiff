@@ -117,6 +117,13 @@ describe("scan (real browser)", () => {
     expect(ids(none)).not.toContain("imprint-link-missing");
   }, 30000);
 
+  it("reports a privacy link as broken only when no other matching link works", async () => {
+    const r = await scan(`${fx.origin}/two-privacy-links`, opts());
+    expect(r.legal.privacy).toMatchObject({ found: true, href: `${fx.origin}/datenschutz`, status: 200 });
+    expect(ids(r)).not.toContain("privacy-link-unreachable");
+    expect(JSON.stringify(r.legal)).not.toContain("alternatives");
+  });
+
   it("does not count cookies that its own legal-link check received", async () => {
     const r = await scan(`${fx.origin}/legal-cookie`, opts());
     expect(r.legal.imprint.status).toBe(200);
