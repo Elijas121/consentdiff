@@ -566,3 +566,11 @@ describe("TCF consent string on a request", () => {
     expect(c?.tcfSignal).toBeUndefined();
   });
 });
+
+describe("long footer labels", () => {
+  it("counts a footer label that starts with the keyword, but not a long headline that mentions it", () => {
+    expect(findLegalLinks([{ href: "https://e.at/37371", text: "Offenlegung & Pflichtangaben zeitung.example/Verlag", inFooter: true }]).imprint.found).toBe(true);
+    expect(findLegalLinks([{ href: "https://e.at/artikel-9", text: "Datenschutz: Was die neue Regel für Ihre Daten bedeutet", inFooter: false }]).privacy.found).toBe(false);
+    expect(findLegalLinks([{ href: "https://e.at/artikel-9", text: "Neue Regel zum Datenschutz: was sich ändert und warum", inFooter: true }]).privacy.found).toBe(false);
+  });
+});

@@ -122,7 +122,7 @@ export async function startFixtures(): Promise<Fixtures> {
           { "set-cookie": ["_ga=GA1.2.123; Path=/; Max-Age=63072000", "session=abc; Path=/"] },
         );
       case "/no-legal":
-        return html(200, page(`<h1>No legal links</h1>`));
+        return html(200, page(`<h1>No legal links</h1><nav><a href="/angebot">Angebot</a></nav>`));
       case "/broken-legal":
         return html(200, page(`<footer><a href="/gone-impressum">Impressum</a> <a href="/datenschutz">Datenschutz</a></footer>`));
       case "/legal-outside-footer":
@@ -163,7 +163,7 @@ export async function startFixtures(): Promise<Fixtures> {
         // A marketing mock-up inside the page content, not a real overlay: must never be clicked.
         return html(200, page(`<h1>Demo</h1>${FOOTER}<div class="demo"><button type="button">Ich akzeptiere alle</button><button type="button">Nur Essenzielle Cookies akzeptieren</button></div>`));
       case "/english-no-legal":
-        return html(200, page(`<h1>English page</h1>`, "", "en"));
+        return html(200, page(`<h1>English page</h1><nav><a href="/shop">Shop</a></nav>`, "", "en"));
       case "/slow-resource":
         // The HTML arrives at once, but one image never finishes: the "load" event never fires.
         return html(200, page(`<h1>Slow</h1>${FOOTER}<img src="/hang.png" alt="">`));
@@ -319,6 +319,17 @@ export async function startFixtures(): Promise<Fixtures> {
       case "/notice-ok-autoconsent":
         // A pure notice with a single "OK": there is nothing to reject. A rule may still "opt out" by clicking OK.
         return html(200, page(`<h1>Kanzlei</h1>${FOOTER}<div id="testnotice" style="position:fixed;bottom:0;left:0;width:300px;background:#fff;padding:1rem">Wir verwenden Cookies. Mit Nutzung dieser Website stimmen Sie zu. <a id="tn-ok" role="button">OK</a></div><script>document.getElementById('tn-ok').onclick=function(){document.getElementById('testnotice').remove();};</script>`));
+      case "/didomi-pay":
+        // A pay-or-consent wall on Didomi: the tool's reject button is relabelled as an order for the ad-free version.
+        return html(200, page(`<h1>News</h1>${FOOTER}<div id="didomi-host" role="dialog" style="position:fixed;inset:10% 10% auto 10%;background:#fff;padding:1rem"><p>Wir und unsere Partner verwenden Cookies.</p><button id="didomi-notice-agree-button">Zustimmen &amp; Weiter</button><button id="didomi-notice-disagree-button">Zeitung PUR bestellen</button></div><script>document.getElementById('didomi-notice-agree-button').onclick=function(){document.getElementById('didomi-host').remove();};</script>`));
+      case "/lazy-legal-footer":
+        // The footer with the legal links is inserted only when the visitor scrolls near the end.
+        return html(200, page(`<h1>News</h1><div style="height:5000px"></div><div id="end"></div><script>
+          new IntersectionObserver(function(e, o){ if (e[0].isIntersecting) { o.disconnect(); document.body.insertAdjacentHTML('beforeend', '<footer><a href="/impressum">Offenlegung &amp; Pflichtangaben</a> <a href="/datenschutz">Datenschutzinformation</a></footer>'); } }).observe(document.getElementById('end'));
+        </script>`));
+      case "/no-links":
+        // A splash page with no links at all: navigation is built by a script.
+        return html(200, page(`<h1>Fahrschule</h1><div onclick="location.href='/start'" style="cursor:pointer">Weiter</div>`));
       case "/banner-many-links": {
         // A news page: many links whose text passes the cheap pre-filter come before the banner in the DOM.
         const teasers = Array.from({ length: 25 }, (_, i) => `<li><a href="/artikel-${i}">Zustimmung zur Reform ${i}</a></li>`).join("");
@@ -379,7 +390,7 @@ export async function startFixtures(): Promise<Fixtures> {
         return html(200, page(`<h1>Scripted legal</h1><footer><div class="blurb" style="cursor:pointer" onclick="location.href='/impressum'"><h6 tabindex="-1">Offenlegung</h6></div><div class="blurb" style="cursor:pointer" onclick="location.href='/datenschutz'"><h6 tabindex="-1">Protection des données</h6></div></footer>`));
       case "/legal-text-only":
         // The words appear, but nothing can be clicked: there is no link.
-        return html(200, page(`<h1>Text only</h1><footer><p>Impressum</p><p>Datenschutz</p></footer>`));
+        return html(200, page(`<h1>Text only</h1><nav><a href="/angebot">Angebot</a></nav><footer><p>Impressum</p><p>Datenschutz</p></footer>`));
       case "/blocked":
         return html(403, page("Da ist etwas schiefgelaufen"));
       case "/impressum":

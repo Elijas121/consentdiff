@@ -247,6 +247,25 @@ async function runBaseline(
     const pageHost = new URL(finalUrl).hostname;
     const consentWall = isConsentWallRedirect(url, finalUrl);
 
+    // The measurement before consent ends here. Then the page is scrolled to its end, because many
+    // footers render only when scrolled into view; what scrolling loads is not counted.
+    const measuredRequests = rawRequests.length;
+    const cookiesBeforeLinkCheck = await context.cookies();
+    await bounded(
+      (async () => {
+        let before = -1;
+        for (let i = 0; i < 12; i += 1) {
+          await page.mouse.wheel(0, 4000);
+          await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight)).catch(() => undefined);
+          await page.waitForTimeout(300);
+          const links = await page.evaluate(() => document.querySelectorAll("a[href]").length).catch(() => 0);
+          if (i >= 2 && links === before) break; // nothing new rendered
+          before = links;
+        }
+      })().catch(() => undefined),
+      8000,
+      () => undefined,
+    );
     const anchors: RawAnchor[] = await bounded(page.evaluate((exactLabels: string[]) =>
       Array.from(document.querySelectorAll<HTMLAnchorElement>("a[href]")).map((a) => ({
         href: a.href,
@@ -291,8 +310,11 @@ async function runBaseline(
     });
     const lang = await bounded(page.evaluate(() => document.documentElement.lang || ""), 5000, () => "");
     const legal = findLegalLinks(anchors);
-    // Read the cookies before the link check: its requests share the cookie jar and may set cookies of their own.
-    const cookiesBeforeLinkCheck = await context.cookies();
+    if (anchors.length === 0) {
+      legal.imprint.noLinksOnPage = true;
+      legal.privacy.noLinksOnPage = true;
+    }
+    // The cookies were read before scrolling and before the link check: both can set cookies of their own.
     // A page may point its legal links anywhere; never let it make consentprobe probe the local network.
     // Only a site the user typed as local (a dev server) may have its legal pages checked there, and
     // only the typed host itself: a redirect from it to another local address stays blocked.
@@ -303,7 +325,7 @@ async function runBaseline(
 
     const measured = {
       finalUrl,
-      requests: classifyRequests(rawRequests, pageHost, firstParty),
+      requests: classifyRequests(rawRequests.slice(0, measuredRequests), pageHost, firstParty),
       cookies: classifyCookies(cookiesBeforeLinkCheck, pageHost, firstParty),
       legal,
       lang,

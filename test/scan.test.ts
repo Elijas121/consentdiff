@@ -108,6 +108,15 @@ describe("scan (real browser)", () => {
     expect(ids(own)).toContain("third-party-before-consent:test-fonts");
   });
 
+  it("scrolls to the end to find a footer that renders late, and never claims absence on a page without links", async () => {
+    const lazy = await scan(`${fx.origin}/lazy-legal-footer`, { ...opts(), imprint: "always" as const });
+    expect(lazy.legal.imprint.found).toBe(true);
+    expect(lazy.legal.privacy.found).toBe(true);
+    const none = await scan(`${fx.origin}/no-links`, { ...opts(), imprint: "always" as const });
+    expect(ids(none)).toContain("imprint-link-unverifiable");
+    expect(ids(none)).not.toContain("imprint-link-missing");
+  }, 30000);
+
   it("does not count cookies that its own legal-link check received", async () => {
     const r = await scan(`${fx.origin}/legal-cookie`, opts());
     expect(r.legal.imprint.status).toBe(200);

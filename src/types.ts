@@ -69,6 +69,8 @@ export interface LegalLink {
   status?: number;
   /** Found as a clickable element without href; its target could not be checked. */
   scripted?: boolean;
+  /** The page has no links at all (a splash page or script-built navigation): absence proves nothing. */
+  noLinksOnPage?: boolean;
 }
 
 export interface Finding {

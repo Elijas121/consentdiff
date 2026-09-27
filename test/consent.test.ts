@@ -330,6 +330,13 @@ describe("consent click test (real browser)", () => {
     expect(r.consent?.accept?.clicked).toBe(true);
   }, 30000);
 
+  it("never clicks a subscribe option that sits on a consent tool's reject button", async () => {
+    const r = await scan(`${fx.origin}/didomi-pay`, opts());
+    expect(r.consent?.banner).toMatchObject({ detected: true, cmp: "Didomi", rejectFound: false, acceptFound: true, rejectLike: "Zeitung PUR bestellen" });
+    expect(r.consent?.reject?.clicked).toBe(false);
+    expect(r.consent?.accept?.clicked).toBe(true);
+  }, 30000);
+
   it("never takes a push-notification prompt for a cookie banner", async () => {
     const r = await scan(`${fx.origin}/push-prompt`, { ...opts(), bannerWaitMs: 800 });
     expect(r.consent?.banner).toMatchObject({ detected: false, rejectFound: false, acceptFound: false });

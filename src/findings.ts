@@ -238,6 +238,15 @@ export function findingsForLegal(
       });
       continue;
     }
+    if (!link.found && link.noLinksOnPage) {
+      findings.push({
+        id: `${key}-link-unverifiable`,
+        severity: "warn",
+        message: `The page has no links at all (a splash page, or navigation built by a script), so whether it links the ${label} could not be checked. Check it manually.`,
+        evidence: [],
+      });
+      continue;
+    }
     if (!link.found) {
       findings.push({
         id: `${key}-link-missing`,

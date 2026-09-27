@@ -295,10 +295,13 @@ async function searchableFrames(page: Page, q: QueryBudget): Promise<Frame[]> {
  * A reject may pass through settings ("Einstellungen", "Speichern"), but never click an accept, a bare
  * OK / close, or a subscribe option. An accept must not be a bare dismissal of a notice.
  */
+/** Pay-or-consent: a button that subscribes or orders the ad-free version is never a reject or an accept. */
+const SUBSCRIBE = /abbon|subscri|suscri|abonn|\babo\b|\bpur\b|bestellen|kaufen|contentpass/i;
+
 const plainLabel = (l: string) => l.replace(/[\u0000-\u001F\u007F-\u009F\u2028\u2029\u202A-\u202E\u2066-\u2069]/g, " ").trim();
 
 export function judgeAutoconsentClicks(action: "reject" | "accept", labels: string[]): string | undefined {
-  const subscribe = /abbon|subscri|suscri|abonn|\babo\b|\bpur\b/i;
+  const subscribe = SUBSCRIBE;
   const dismiss = (l: string) => isOkLabel(l) || /^(close|schlie(ß|ss)en|verstanden|got it|ok,? got it|x|×)$/i.test(normalizeLabel(l) || l.trim());
   for (const label of labels) {
     if (!label) continue;
@@ -522,9 +525,17 @@ async function sameBanner(a: Found, b: Found, q: QueryBudget): Promise<boolean> 
 
 async function scanOnce(page: Page, q: QueryBudget, anywhere = false): Promise<Controls> {
   const controls: Controls = {};
+  let selectorRejectLike: string | undefined;
   for (const cmp of CMPS) {
-    const reject = await bySelector(page, cmp.reject, q);
-    const accept = await bySelector(page, cmp.accept, q);
+    let reject = await bySelector(page, cmp.reject, q);
+    let accept = await bySelector(page, cmp.accept, q);
+    // A known selector is no licence to skip the label: pay-or-consent sites put "subscribe" on the
+    // tool's reject button ("Zeitung PUR bestellen"). Such a control is reported, never clicked.
+    if (reject && !selectorLabelFits("reject", reject.control.label)) {
+      selectorRejectLike = reject.control.label;
+      reject = undefined;
+    }
+    if (accept && !selectorLabelFits("accept", accept.control.label)) accept = undefined;
     if (reject || accept) {
       controls.cmp = cmp.name;
       controls.reject = reject;
@@ -536,8 +547,14 @@ async function scanOnce(page: Page, q: QueryBudget, anywhere = false): Promise<C
   controls.reject ??= text.reject;
   controls.accept ??= text.accept;
   if (!controls.accept && text.ok && controls.reject && (await sameBanner(text.ok, controls.reject, q))) controls.accept = text.ok;
-  if (!controls.reject) controls.rejectLike = text.rejectLike;
+  if (!controls.reject) controls.rejectLike = text.rejectLike ?? selectorRejectLike;
   return controls;
+}
+
+/** A label found through a consent tool's selector must not say the opposite, subscribe, or merely dismiss. */
+function selectorLabelFits(action: "reject" | "accept", label: string): boolean {
+  if (SUBSCRIBE.test(label)) return false;
+  return action === "reject" ? !isAcceptLabel(label) && !isOkLabel(label) : !isRejectLabel(label);
 }
 
 /** Poll until a banner control shows up (banners often render late), then re-scan once for the second button. */

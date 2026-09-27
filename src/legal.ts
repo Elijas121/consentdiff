@@ -46,7 +46,12 @@ const WEAK_SCORE = 2;
  * alone is not enough; a short teaser like "Mehr Privatsphäre im Netz" must not count.
  */
 function score(a: RawAnchor, kind: Kind): number {
-  const labelHit = a.text.length > 0 && a.text.length <= MAX_LABEL && kind.label.test(a.text);
+  // A footer link may carry a longer label that starts with the keyword ("Offenlegung & Pflichtangaben
+  // zeitung.example/Verlag"); elsewhere long labels are headlines that merely mention the word.
+  const startsWithKeyword = kind.label.exec(a.text.trim())?.index === 0;
+  const labelHit =
+    a.text.length > 0 &&
+    ((a.text.length <= MAX_LABEL && kind.label.test(a.text)) || (a.inFooter && a.text.length <= 2 * MAX_LABEL && startsWithKeyword));
   let pathHit = false;
   try {
     pathHit = kind.path.test(new URL(a.href).pathname);
