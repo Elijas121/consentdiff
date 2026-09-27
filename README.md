@@ -1,5 +1,7 @@
 # consentprobe
 
+[![npm](https://img.shields.io/npm/v/consentprobe)](https://www.npmjs.com/package/consentprobe) [![CI](https://github.com/Elijas121/consentprobe/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Elijas121/consentprobe/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 Measure what a website does before and after a visitor answers the cookie banner.
 
 `consentprobe` loads a page in a real browser three times, each visit with its own empty cookie jar:
@@ -10,7 +12,7 @@ Measure what a website does before and after a visitor answers the cookie banner
 
 It reports technical findings with evidence. It gives no legal advice and does not decide whether a law is violated.
 
-> Status: early (0.1.0), [on npm](https://www.npmjs.com/package/consentprobe).
+> Status: early (0.1.1), [on npm](https://www.npmjs.com/package/consentprobe). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## Why another scanner?
 
@@ -23,7 +25,7 @@ A local test page whose banner ignores the reject click (not a real site). Run i
 ![consentprobe run against a local test page: the banner's reject click is ignored and tracking continues](docs/demo.gif)
 
 ```
-consentprobe 0.1.0  http://localhost:PORT/banner-bad
+consentprobe 0.1.1  http://localhost:PORT/banner-bad
 Phase: before-consent (no interaction with any cookie banner), then reject and accept visits
 Consent banner: recognized | reject: found ("Alle ablehnen") | accept: found ("Alle akzeptieren")
 2 error, 0 warn, 1 info | before consent: 0 third-party host(s), 1 request(s), 0 cookie(s)
@@ -125,15 +127,22 @@ Categories: `analytics`, `advertising`, `tag-manager`, `social`, `fonts`, `maps`
 `action.yml` is a composite GitHub Action. It installs the tool, scans the URL and writes the Markdown report into the job summary; if the page cannot be measured, the summary says why. In a public repository the job summary is public, so point it only at sites you own or are authorized to test:
 
 ```yaml
-- uses: Elijas121/consentprobe@<commit SHA>   # pin a commit (or a release tag, once there is one)
+- uses: Elijas121/consentprobe@v0.1.1   # or the release's commit SHA, which cannot be moved
   with:
     url: https://staging.example.de
     fail-on: error
 ```
 
+The action needs no checkout step and no npm install; it brings its own Chromium. Inputs: `url` (required), `fail-on` (`error`, `warn` or `never`), `imprint` (`auto`, `always`, `never`), `first-party` (one extra domain of the operator) and `report` (path of the Markdown report, default `consentprobe-report.md`).
+
 Good to know: the action sets up Node 22 and pnpm for the rest of the job. GitHub-hosted runners are mostly in the US; a consent tool that shows its banner only to EU visitors may show none there, and the findings then describe the US experience. For EU results use a self-hosted runner in the EU.
 
 ## Use it as a library
+
+```bash
+npm install consentprobe
+npx consentprobe --install-browser   # once: the Chromium build the library drives
+```
 
 ```ts
 import { scan, formatText } from "consentprobe";
@@ -147,7 +156,14 @@ if (result.summary.error > 0) process.exitCode = 1;
 
 ## Use it with a coding agent
 
-`skills/consentprobe/SKILL.md` teaches Claude Code and similar agents to run the scan, read the JSON and explain each finding with a concrete fix, without legal conclusions.
+`skills/consentprobe/SKILL.md` teaches Claude Code and similar agents to run the scan, read the JSON and explain each finding with a concrete fix, without legal conclusions. Install it for Claude Code:
+
+```bash
+mkdir -p ~/.claude/skills/consentprobe
+curl -fsSL https://raw.githubusercontent.com/Elijas121/consentprobe/main/skills/consentprobe/SKILL.md -o ~/.claude/skills/consentprobe/SKILL.md
+```
+
+Then ask, for example, "check example.de for tracking before consent". Other agents that read `SKILL.md` files take the same file in their own skills folder.
 
 ## Limits
 
