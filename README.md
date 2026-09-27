@@ -10,7 +10,7 @@ Measure what a website does before and after a visitor answers the cookie banner
 
 It reports technical findings with evidence. It gives no legal advice and does not decide whether a law is violated.
 
-> Status: early (0.1.0), not yet on npm. Run it straight from GitHub, see below.
+> Status: early (0.1.0), [on npm](https://www.npmjs.com/package/consentprobe).
 
 ## Why another scanner?
 
@@ -63,11 +63,11 @@ Technical findings only. This is not legal advice and does not assess whether a 
 
 ## Install and run
 
-Needs Node 22 or newer. Until the first npm release, run it straight from GitHub (the first run builds it, which takes a minute):
+Needs Node 22 or newer:
 
 ```bash
-npx github:Elijas121/consentprobe --install-browser   # once: the Chromium build it was tested with
-npx github:Elijas121/consentprobe example.de
+npx consentprobe --install-browser   # once: the Chromium build it was tested with
+npx consentprobe example.de
 ```
 
 On Linux, add `--with-deps` to `--install-browser` once to install Chromium's system libraries (needs root). `https://` is added when the URL has none (`http://` for `localhost` and IP addresses).

@@ -15,11 +15,11 @@ Runs a real browser against a URL in three isolated visits (baseline, reject cli
 
 ## How to run it
 
-Straight from GitHub (until the npm release), Node 22 or newer:
+From npm, Node 22 or newer:
 
 ```bash
-npx github:Elijas121/consentprobe --install-browser          # once
-npx github:Elijas121/consentprobe <url> --format json --screenshots /tmp/consentprobe-evidence --fail-on never
+npx consentprobe --install-browser          # once
+npx consentprobe <url> --format json --screenshots /tmp/consentprobe-evidence --fail-on never
 ```
 
 Keep reports and screenshots of real sites outside any repository.
