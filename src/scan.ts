@@ -355,6 +355,7 @@ function mergeBanner(a?: ConsentBanner, b?: ConsentBanner): ConsentBanner {
     rejectFound: Boolean(a?.rejectFound || b?.rejectFound),
     acceptFound: Boolean(a?.acceptFound || b?.acceptFound),
     rejectLike: a?.rejectLike ?? b?.rejectLike,
+    autoconsentCmp: a?.autoconsentCmp ?? b?.autoconsentCmp,
     overlayHint: a?.overlayHint || b?.overlayHint || undefined,
     incomplete: (a?.incomplete || b?.incomplete) && !(a?.detected || b?.detected) ? true : undefined,
     rejectSearchIncomplete:
@@ -401,7 +402,17 @@ export async function scan(rawUrl: string, options: ScanOptions = {}): Promise<S
     });
   try {
     const identity = await bounded(visitorIdentity(browser), 10000, () => undefined);
-    const sessionOpts: SessionOptions = { timeoutMs, settleMs, bannerWaitMs, firstParty, screenshotDir: options.screenshotDir, identity, httpCredentials };
+    const sessionOpts: SessionOptions = {
+      timeoutMs,
+      settleMs,
+      bannerWaitMs,
+      firstParty,
+      screenshotDir: options.screenshotDir,
+      identity,
+      httpCredentials,
+      autoconsent: options.autoconsent,
+      autoconsentRules: options.autoconsentRules,
+    };
     // A failing click visit (the site blocks a second visit, a navigation error) must not throw away
     // the finished baseline: it becomes an untested session with its reason.
     const visit = (action: "reject" | "accept", o: SessionOptions) =>

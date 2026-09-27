@@ -23,6 +23,7 @@ Options:
   --timeout <ms>            Navigation timeout (default: 30000)
   --browser <chromium|chrome>  Bundled Chromium or installed Chrome (default: chromium)
   --no-click-test           Skip the reject/accept visits (baseline only)
+  --no-autoconsent          Do not ask the second engine (DuckDuckGo autoconsent) for unknown banners
   --banner-wait <ms>        How long to wait for a banner to appear (default: 4000)
   --screenshots <dir>       Save evidence screenshots before/after each banner click
   --first-party <domain>    Extra domain of the site operator, e.g. its asset CDN (repeatable)
@@ -80,6 +81,7 @@ async function main(): Promise<void> {
         browser: { type: "string", default: "chromium" },
         rules: { type: "string" },
         "no-click-test": { type: "boolean" },
+        "no-autoconsent": { type: "boolean" },
         "first-party": { type: "string", multiple: true },
         screenshots: { type: "string" },
         imprint: { type: "string", default: "auto" },
@@ -126,6 +128,7 @@ async function main(): Promise<void> {
     return fail(err instanceof Error ? err.message : String(err));
   }
   if (values["no-click-test"]) options.clickTest = false;
+  if (values["no-autoconsent"]) options.autoconsent = false;
   if (values.rules) {
     let json: string;
     try {

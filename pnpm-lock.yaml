@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@duckduckgo/autoconsent':
+        specifier: 16.42.0
+        version: 16.42.0
       playwright:
         specifier: ^1.63.0
         version: 1.63.0
@@ -26,6 +29,9 @@ importers:
         version: 5.0.1(@types/node@26.6.2)(vite@8.3.0(@types/node@26.6.2))
 
 packages:
+
+  '@duckduckgo/autoconsent@16.42.0':
+    resolution: {integrity: sha512-rpG6FnMzOGIfnWWw8qYjXmyfl+li+V1Z1AJVzEOOMg2d2Hc7ZgVTqyWkN0aMI0C/+mY6f1myTTdd7bimIsVC2g==}
 
   '@jridgewell/resolve-uri@3.1.2':
     resolution: {integrity: sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==}
@@ -461,6 +467,12 @@ packages:
   tldts-core@7.4.14:
     resolution: {integrity: sha512-KYkjfJHnIC5t+Gy7hPrMHgJmWc/N9FfmS+fggRPSlpFckidpB9HD6OzPsSTkfDH+MpZgcu2tJPGgLfHl979N1Q==}
 
+  tldts-core@7.4.15:
+    resolution: {integrity: sha512-ERuv0p98XgSzmlSLJr8vDNxX+uATGInlN97V3R+JpYWaSqn5IG3ewWgCwczk4bkOpgth/o8Nt5FOi4B4w0n/1A==}
+
+  tldts-experimental@7.4.15:
+    resolution: {integrity: sha512-IHFsr0juxP1k2JemWCefrfnHaVX1NHgpRApdnGvgItJSEZvhcEv2yOt2DVJ3j7aPbEEoxjN7dci7+mtZmfGIJw==}
+
   tldts@7.4.14:
     resolution: {integrity: sha512-EahQoi+Q5oqmG3yxRHx+bwn36OaLbtw6jnTFcGjc8fcmktzTgk45xRnzAx8Ch87PFEiqRhoc3FWBmY+LBrvEGQ==}
     hasBin: true
@@ -563,6 +575,10 @@ packages:
     hasBin: true
 
 snapshots:
+
+  '@duckduckgo/autoconsent@16.42.0':
+    dependencies:
+      tldts-experimental: 7.4.15
 
   '@jridgewell/resolve-uri@3.1.2': {}
 
@@ -839,6 +855,12 @@ snapshots:
       picomatch: 4.0.7
 
   tldts-core@7.4.14: {}
+
+  tldts-core@7.4.15: {}
+
+  tldts-experimental@7.4.15:
+    dependencies:
+      tldts-core: 7.4.15
 
   tldts@7.4.14:
     dependencies:

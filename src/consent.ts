@@ -2,7 +2,8 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { Browser, Frame, Locator, Page } from "playwright";
 import { classifyCookies, classifyRequests } from "./findings.js";
-import { ask, newBudget, type QueryBudget } from "./bounded.js";
+import { runAutoconsent, type AutoconsentRun } from "./autoconsent.js";
+import { ask, bounded, newBudget, type QueryBudget } from "./bounded.js";
 import { applyIdentity, visitorContextOptions, type HttpCredentials, type VisitorIdentity } from "./identity.js";
 import { explainNavigationError, isConsentWallRedirect, openPage } from "./navigate.js";
 import { recordRequests, type RawRequest } from "./record.js";
@@ -587,6 +588,8 @@ export interface SessionOptions {
   identity?: VisitorIdentity;
   /** Basic-auth credentials from the URL (password-protected test sites). */
   httpCredentials?: HttpCredentials;
+  autoconsent?: boolean;
+  autoconsentRules?: string;
 }
 
 async function shot(page: Page, dir: string | undefined, name: string): Promise<void> {
@@ -614,7 +617,8 @@ export async function runConsentSession(
     });
     await context.addInitScript(() => {
       const mark = () => (window as unknown as { __consentprobeMark?: () => void }).__consentprobeMark?.();
-      for (const type of ["pointerdown", "mousedown"]) document.addEventListener(type, mark, { capture: true });
+      // "click" too: autoconsent clicks from a page script, which fires no pointerdown.
+      for (const type of ["pointerdown", "mousedown", "click"]) document.addEventListener(type, mark, { capture: true });
     });
     const page = await context.newPage();
     await applyIdentity(page, o.identity);
@@ -643,12 +647,41 @@ export async function runConsentSession(
     if (q.timeouts > 0 && banner.detected && !banner.rejectFound) banner.rejectSearchIncomplete = true;
     const target = action === "reject" ? controls.reject : controls.accept;
     const session: ConsentSession = { action, clicked: false, requestsAfter: [], cookiesBefore: [], cookiesAfter: [] };
+    const pageHost = new URL(page.url()).hostname;
+    if (!target && !wall && o.autoconsent !== false && !page.isClosed()) {
+      // Second engine: autoconsent knows several hundred consent tools. It may answer through a
+      // settings layer; the report keeps that apart from a control on the first layer.
+      await shot(page, o.screenshotDir, `${action}-1-before-autoconsent.png`);
+      session.cookiesBefore = classifyCookies(await context.cookies(), pageHost, o.firstParty);
+      const fallbackMarker = raw.length;
+      armed = true;
+      const run = await bounded(runAutoconsent(page, action === "reject" ? "optOut" : "optIn", Math.max(o.bannerWaitMs, 3000), o.autoconsentRules), 30000, () => ({ done: false }) as AutoconsentRun);
+      armed = false;
+      if (run.cmp) {
+        banner.detected = true;
+        banner.autoconsentCmp = run.cmp;
+        banner.incomplete = undefined;
+        banner.overlayHint = undefined;
+      }
+      if (run.cmp && run.done && !run.navigatedAway) {
+        session.control = { label: `${run.cmp} (answered by autoconsent)`, method: "autoconsent" };
+        session.clicked = true;
+        await page.waitForLoadState("networkidle", { timeout: 5000 }).catch(() => undefined);
+        if (o.settleMs > 0) await page.waitForTimeout(o.settleMs);
+        await shot(page, o.screenshotDir, `${action}-2-after-autoconsent.png`);
+        session.requestsAfter = classifyRequests(raw.slice(clickMarker ?? fallbackMarker), pageHost, o.firstParty);
+        session.cookiesAfter = classifyCookies(await context.cookies(), pageHost, o.firstParty);
+        return { banner, session };
+      }
+      if (run.cmp) session.error = run.navigatedAway ? "autoconsent left the site while answering the banner; not tested" : `autoconsent recognized ${run.cmp} but could not answer it`;
+      session.cookiesBefore = [];
+      clickMarker = undefined;
+    }
     if (!target) {
       await shot(page, o.screenshotDir, `${action}-0-no-control-found.png`);
       return { banner, session };
     }
 
-    const pageHost = new URL(page.url()).hostname;
     session.control = target.control;
     // The control is found by position; if the page re-rendered since, that position may hold another
     // element now. Only click when the label is still the one that was judged.

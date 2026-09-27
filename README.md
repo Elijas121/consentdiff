@@ -99,6 +99,7 @@ node dist/cli.js example.de
 | `--out <file>` | Write the report to a file (missing folders are created) |
 | `--fail-on error\|warn\|never` | Exit code 1 at this severity or above (default `error`) |
 | `--no-click-test` | Baseline only, skip the reject and accept visits |
+| `--no-autoconsent` | Do not ask the second engine for banners the own search does not recognize |
 | `--screenshots <dir>` | Save evidence screenshots before and after each click |
 | `--first-party <domain>` | Extra domain of the site operator, e.g. its own asset CDN (repeatable) |
 | `--imprint auto\|always\|never` | German rules: `auto` decides by language and domain, `always` forces them, `never` skips the imprint check |
@@ -154,6 +155,7 @@ if (result.summary.error > 0) process.exitCode = 1;
 - **Browser identity.** Headless Chromium calls itself "HeadlessChrome", and many large sites then hide their banner and behave differently. `consentprobe` therefore presents itself like the same Chromium in a normal window (user agent, client hints, German language). It does not hide that the browser is automated (`navigator.webdriver` stays `true`), and a site that answers with a bot check or HTTP 403 is not measured.
 - **First layer only.** Choices behind "Settings" are not explored. A site that redirects to a separate full-page consent page is tested on that page; its legal links are not judged there.
 - **One page per run.** No crawling; a password-protected test site works with credentials in the URL (they are sent only to that origin).
+- **Two engines.** consentprobe first looks for the controls itself (known consent-tool selectors, whole labels in seven languages). When it finds none, it asks [DuckDuckGo's autoconsent](https://github.com/duckduckgo/autoconsent) (MPL-2.0, rules for several hundred consent tools). autoconsent may reject through a settings layer; the report says so ("not on the first layer, answered by autoconsent") and keeps the warning that the first layer has no reject control.
 - **Wording.** Controls are matched by known consent-platform selectors and by whole labels in German, English, French, Italian, Spanish, Dutch and Polish, only inside an overlay or a container the site names as its cookie banner, and only when that overlay talks about cookies, consent or privacy. Unusual wording is reported as "not found", never guessed.
 - **The tracker list is hand-curated and incomplete.** Unknown hosts appear as info. Lists such as DuckDuckGo Tracker Radar, Disconnect and Ghostery TrackerDB are CC BY-NC-SA and therefore not bundled.
 - **Consent Mode.** A tag manager can load before consent and still block its tags, so tag managers are warnings; the analytics and advertising findings show what was actually sent.

@@ -307,6 +307,15 @@ export async function startFixtures(): Promise<Fixtures> {
       case "/banner-cc-opt-out":
         // The cookieconsent script names its opt-out banner type "cc-type-opt-out": that is the banner, not a content blocker.
         return html(200, page(`<h1>Praxis</h1>${FOOTER}<div class="cc-window" role="dialog" style="position:fixed;inset:20% 20% auto 20%;background:#fff;padding:1rem"><div class="cc-modal cc-window cc-type-opt-out"><p>Wenn Sie unsere Webseite uneingeschränkt verwenden möchten, klicken Sie bitte auf »Alles zulassen«. Mehr in der <a href="/datenschutz">Datenschutzerklärung</a>.</p><div class="cc-compliance"><a class="cc-btn cc-allow" role="button" tabindex="0" aria-label="allow cookies">Alles zulassen</a><a class="cc-btn cc-deny" role="button" tabindex="0" aria-label="deny cookies">Notwendiges zulassen</a></div></div></div><script>document.querySelectorAll('.cc-btn').forEach(function(b){b.addEventListener('click',function(){document.querySelector('.cc-window').remove();});});</script>`));
+      case "/banner-reject-in-settings":
+        // Reject only on the second layer; the first layer shows "Zustimmen" and "Einstellungen". The analytics
+        // script loads on accept only, so a reject answered through the settings must show no tracking.
+        return html(200, page(`<h1>Shop</h1>${FOOTER}<div id="testcmp" role="dialog" style="position:fixed;bottom:0;left:0;right:0;background:#fff;padding:1rem"><p>Wir verwenden Cookies.</p><button id="tc-accept">Zustimmen</button><button id="tc-settings">Einstellungen</button><div id="tc-layer2" style="display:none"><button id="tc-reject">Speichern ohne Statistik</button></div></div><script>
+          var box = document.getElementById('testcmp');
+          document.getElementById('tc-settings').onclick = function(){ document.getElementById('tc-layer2').style.display = 'block'; };
+          document.getElementById('tc-reject').onclick = function(){ box.remove(); };
+          document.getElementById('tc-accept').onclick = function(){ box.remove(); var s = document.createElement('script'); s.src = '${thirdOrigin}/analytics.js'; document.head.appendChild(s); };
+        </script>`));
       case "/banner-many-links": {
         // A news page: many links whose text passes the cheap pre-filter come before the banner in the DOM.
         const teasers = Array.from({ length: 25 }, (_, i) => `<li><a href="/artikel-${i}">Zustimmung zur Reform ${i}</a></li>`).join("");

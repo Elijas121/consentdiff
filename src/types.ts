@@ -80,7 +80,8 @@ export interface Finding {
 
 export interface ConsentControl {
   label: string;
-  method: "cmp-selector" | "text";
+  /** "autoconsent": answered by DuckDuckGo's autoconsent rule for this consent tool, possibly through its settings layer. */
+  method: "cmp-selector" | "text" | "autoconsent";
 }
 
 export interface ConsentBanner {
@@ -97,6 +98,8 @@ export interface ConsentBanner {
   incomplete?: boolean;
   /** An accept control was found, but parts of the page did not respond while searching for a reject control. */
   rejectSearchIncomplete?: boolean;
+  /** Consent tool that autoconsent recognized when consentprobe's own search found no control. */
+  autoconsentCmp?: string;
 }
 
 /** One visit in which the visitor clicked the reject or the accept control. */
@@ -134,6 +137,10 @@ export interface ScanOptions {
   screenshotDir?: string;
   /** Check for an imprint link: "auto" only on German-language or .de/.at/.ch sites (default). */
   imprint?: "auto" | "always" | "never";
+  /** Second engine (autoconsent) for banners consentprobe's own search does not know. Default: on. */
+  autoconsent?: boolean;
+  /** Replaces autoconsent's bundled rules (a rules.json text). For tests only. */
+  autoconsentRules?: string;
 }
 
 export interface ScanResult {

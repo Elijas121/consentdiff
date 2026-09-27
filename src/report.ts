@@ -49,9 +49,16 @@ function bannerLine(r: ScanResult, esc: (s: string) => string = (s) => s): strin
   if (!c.banner.detected && c.banner.incomplete) return "Consent banner: search incomplete (parts of the page did not respond)";
   if (!c.banner.detected && c.banner.overlayHint) return "Consent banner: cookie overlay visible, controls not automatable";
   if (!c.banner.detected) return "Consent banner: not recognized";
-  const ctl = (s?: { control?: { label: string }; clicked?: boolean }, found = false) =>
-    !found ? "not found" : s?.control ? `found ("${esc(s.control.label)}")${s.clicked ? "" : ", click failed"}` : "found, not tested";
-  return `Consent banner: recognized${c.banner.cmp ? ` (${esc(c.banner.cmp)})` : ""} | reject: ${ctl(c.reject, c.banner.rejectFound)} | accept: ${ctl(c.accept, c.banner.acceptFound)}`;
+  const ctl = (s?: { control?: { label: string; method?: string }; clicked?: boolean }, found = false) =>
+    s?.control?.method === "autoconsent" && s.clicked
+      ? `${found ? "found" : "not on the first layer"}, answered by autoconsent`
+      : !found
+        ? "not found"
+        : s?.control
+          ? `found ("${esc(s.control.label)}")${s.clicked ? "" : ", click failed"}`
+          : "found, not tested";
+  const cmp = c.banner.cmp ?? c.banner.autoconsentCmp;
+  return `Consent banner: recognized${cmp ? ` (${esc(cmp)})` : ""} | reject: ${ctl(c.reject, c.banner.rejectFound)} | accept: ${ctl(c.accept, c.banner.acceptFound)}`;
 }
 
 export function formatText(r: ScanResult): string {

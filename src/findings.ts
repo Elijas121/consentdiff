@@ -423,12 +423,14 @@ export function findingsForConsent(
         "An accept control was found, but parts of the page did not respond while consentprobe searched for a reject control. Whether the first layer has one is unknown; check the screenshots.",
       evidence: [],
     });
-  } else if (banner.acceptFound && !banner.rejectFound) {
+  } else if ((banner.acceptFound || accept?.control?.method === "autoconsent") && !banner.rejectFound) {
+    const viaSettings = reject?.control?.method === "autoconsent" && reject.clicked;
     findings.push({
       id: "no-reject-control-on-first-layer",
       severity: "warn",
-      message:
-        "An accept control was found but no general reject control on the first banner layer. Check whether rejecting needs extra steps.",
+      message: viaSettings
+        ? "No general reject control on the first banner layer. Rejecting was possible through the consent tool's settings; autoconsent did that for the reject test below."
+        : "An accept control was found but no general reject control on the first banner layer. Check whether rejecting needs extra steps.",
       evidence: banner.rejectLike
         ? [`reject-like control, not treated as a general reject: "${banner.rejectLike}"`]
         : [],

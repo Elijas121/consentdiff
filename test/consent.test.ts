@@ -13,7 +13,9 @@ afterAll(async () => {
   await fx.close();
 });
 
+// The own search is tested here; the second engine has its own tests at the end of this file.
 const opts = () => ({
+  autoconsent: false,
   settleMs: 400,
   timeoutMs: 15000,
   bannerWaitMs: 4000,
@@ -376,4 +378,43 @@ describe("label check before the click (real browser)", () => {
       await browser.close();
     }
   });
+});
+
+describe("second engine: autoconsent", () => {
+  let fx2: Fixtures;
+  beforeAll(async () => {
+    fx2 = await startFixtures();
+  });
+  afterAll(async () => {
+    await fx2.close();
+  });
+  // A rule in autoconsent's format for the fixture's made-up consent tool: reject needs the settings layer.
+  const rules = JSON.stringify({
+    autoconsent: [
+      {
+        name: "test-cmp",
+        detectCmp: [{ exists: "#testcmp" }],
+        detectPopup: [{ visible: "#testcmp" }],
+        optIn: [{ waitForThenClick: "#tc-accept" }],
+        optOut: [{ waitForThenClick: "#tc-settings" }, { waitForThenClick: "#tc-reject" }],
+      },
+    ],
+  });
+  const o = { settleMs: 500, timeoutMs: 15000, bannerWaitMs: 1000, imprint: "never" as const, autoconsentRules: rules };
+
+  it("rejects through a settings layer, keeps the first-layer warning and measures after the reject", async () => {
+    const r = await scan(`${fx2.origin}/banner-reject-in-settings`, o);
+    expect(r.consent?.banner).toMatchObject({ detected: true, rejectFound: false, acceptFound: true, autoconsentCmp: "test-cmp" });
+    expect(r.consent?.reject?.control?.method).toBe("autoconsent");
+    expect(r.consent?.reject?.clicked).toBe(true);
+    expect(r.findings.find((f) => f.id === "no-reject-control-on-first-layer")?.message).toContain("through the consent tool's settings");
+    expect(r.findings.filter((f) => f.id.startsWith("third-party-after-reject"))).toEqual([]);
+    expect(r.consent?.accept?.control?.label).toBe("Zustimmen");
+  }, 60000);
+
+  it("is not used when switched off", async () => {
+    const r = await scan(`${fx2.origin}/banner-reject-in-settings`, { ...o, autoconsent: false });
+    expect(r.consent?.reject?.clicked).toBe(false);
+    expect(r.consent?.banner.autoconsentCmp).toBeUndefined();
+  }, 60000);
 });

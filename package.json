@@ -30,6 +30,7 @@
     "prepublishOnly": "pnpm typecheck && pnpm test && pnpm build"
   },
   "dependencies": {
+    "@duckduckgo/autoconsent": "16.42.0",
     "playwright": "^1.63.0",
     "tldts": "^7.4.14"
   },
