@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.4 (2026-09-27)
+
+- Google reCAPTCHA before any consent interaction is now a warning instead of info, like maps, video and chat widgets. It analyses the visitor's device and behaviour on Google's servers, and loading it on every page is a common setup; an Austrian court (BVwG, 13 September 2024, W298 2274626-1) held that reCAPTCHA v3 needs consent. Other captchas (hCaptcha …) stay info. With the default `--fail-on error` this does not fail a CI job.
+- GitHub Action: shorter description (GitHub Marketplace allows fewer than 125 characters). That the action sets up Node 22 and pnpm for the rest of the job is in the README.
+
 ## 0.1.3 (2026-09-27)
 
 - New warning `imprint-link-partly-broken` / `privacy-link-partly-broken`: a legal link on the site's own domain returns 404 or 410 while another matching link works. 0.1.2 reported nothing in this case, although visitors who click the dead link land on an error page. A dead link on another domain (a web agency's credit link) is still ignored.

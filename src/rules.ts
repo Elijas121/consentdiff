@@ -136,7 +136,17 @@ export const BUILT_IN_RULES: TrackerRule[] = [
   { id: "cookie-script-cmp", name: "Cookie-Script", category: "consent-platform", hosts: ["cookie-script.com"] },
   { id: "osano-cmp", name: "Osano", category: "consent-platform", hosts: ["osano.com"] },
   // Bot protection
-  { id: "recaptcha", name: "Google reCAPTCHA", category: "captcha", hosts: ["google.com", "www.google.com", "gstatic.com", "www.gstatic.com", "recaptcha.net", "www.recaptcha.net"], pathPrefix: "/recaptcha" },
+  {
+    id: "recaptcha",
+    name: "Google reCAPTCHA",
+    category: "captcha",
+    hosts: ["google.com", "www.google.com", "gstatic.com", "www.gstatic.com", "recaptcha.net", "www.recaptcha.net"],
+    pathPrefix: "/recaptcha",
+    // Unlike other captchas it analyses the visitor's device and behaviour on Google's servers, and
+    // setups that load it on every page are common; rated like maps and video, not as context.
+    severity: "warn",
+    hint: "It analyses the visitor's device and behaviour on Google's servers. Load it only after consent, or only when the protected form is used.",
+  },
   { id: "hcaptcha", name: "hCaptcha", category: "captcha", hosts: ["hcaptcha.com"] },
   { id: "turnstile", name: "Cloudflare Turnstile", category: "captcha", hosts: ["challenges.cloudflare.com"] },
 ];

@@ -119,6 +119,12 @@ describe("findings", () => {
     expect(sev["third-party-before-consent:google-fonts"]).toBe("error");
     expect(sev["third-party-before-consent:jsdelivr"]).toBe("warn");
   });
+  it("rates Google reCAPTCHA as warn and other captchas as info", () => {
+    const f = findingsForRequests([req("https://www.google.com/recaptcha/api.js"), req("https://js.hcaptcha.com/1/api.js")]);
+    const sev = Object.fromEntries(f.map((x) => [x.id, x.severity]));
+    expect(sev["third-party-before-consent:recaptcha"]).toBe("warn");
+    expect(sev["third-party-before-consent:hcaptcha"]).toBe("info");
+  });
   it("ignores first-party requests and lists unknown third parties as info", () => {
     const f = findingsForRequests([req("https://example.de/app.js", false), req("https://unknown.example.org/a.js")]);
     expect(f).toHaveLength(1);

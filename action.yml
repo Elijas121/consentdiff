@@ -1,5 +1,5 @@
 name: consentprobe
-description: Measure what a website does before and after the cookie banner and fail the job on findings. Sets up Node 22 and pnpm for the rest of the job.
+description: "Test what a website does before and after the cookie banner: trackers before consent, after reject and after accept."
 author: Elias Delil
 branding:
   icon: shield

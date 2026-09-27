@@ -12,7 +12,7 @@ Measure what a website does before and after a visitor answers the cookie banner
 
 It reports technical findings with evidence. It gives no legal advice and does not decide whether a law is violated.
 
-> Status: early (0.1.3), [on npm](https://www.npmjs.com/package/consentprobe). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+> Status: early (0.1.4), [on npm](https://www.npmjs.com/package/consentprobe). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## Why another scanner?
 
@@ -25,7 +25,7 @@ A local test page whose banner ignores the reject click (not a real site). Run i
 ![consentprobe run against a local test page: the banner's reject click is ignored and tracking continues](docs/demo.gif)
 
 ```
-consentprobe 0.1.3  http://localhost:PORT/banner-bad
+consentprobe 0.1.4  http://localhost:PORT/banner-bad
 Phase: before-consent (no interaction with any cookie banner), then reject and accept visits
 Consent banner: recognized | reject: found ("Alle ablehnen") | accept: found ("Alle akzeptieren")
 2 error, 0 warn, 1 info | before consent: 0 third-party host(s), 1 request(s), 0 cookie(s)
@@ -47,7 +47,7 @@ Technical findings only. This is not legal advice and does not assess whether a 
 | Known tracker cookies before consent (`_ga`, `_fbp`, Adobe, Hotjar, HubSpot, …) | error |
 | Tracker requests or cookies set after the reject click | error |
 | Cookieless analytics (Plausible, Vercel Analytics) or performance monitoring (New Relic) before consent or after reject | warn |
-| Tag manager, social, chat, maps, video or public CDNs before consent | warn |
+| Tag manager, social, chat, maps, video, public CDNs or Google reCAPTCHA before consent | warn |
 | Google Consent Mode "denied" pings (`gcs=G100`) before consent or after reject | warn |
 | An accept control, but no general reject control on the first layer | warn |
 | Imprint (Impressum) link missing or returning 404/410 | error on `.de`, `.at`, `.ch`, `.li` domains, warn on other German-language sites |
@@ -128,7 +128,7 @@ Categories: `analytics`, `advertising`, `tag-manager`, `social`, `fonts`, `maps`
 `action.yml` is a composite GitHub Action. It installs the tool, scans the URL and writes the Markdown report into the job summary; if the page cannot be measured, the summary says why. In a public repository the job summary is public, so point it only at sites you own or are authorized to test:
 
 ```yaml
-- uses: Elijas121/consentprobe@v0.1.3   # or the release's commit SHA, which cannot be moved
+- uses: Elijas121/consentprobe@v0.1.4   # or the release's commit SHA, which cannot be moved
   with:
     url: https://staging.example.de
     fail-on: error
