@@ -292,6 +292,9 @@ export async function startFixtures(): Promise<Fixtures> {
       case "/banner-aria-label":
         // A cookieconsent-style notice: the button reads "Akzeptieren", its aria-label says something else.
         return html(200, page(`<h1>Shop</h1>${FOOTER}<div id="banner" role="dialog" style="position:fixed;top:0;left:0;right:0;background:#eee;padding:1rem">Wir verwenden Cookies, um unsere Dienste zu verbessern. <a role="button" tabindex="0" aria-label="dismiss cookie message" class="cc-btn cc-dismiss">Akzeptieren</a></div><script>document.querySelector('#banner a').addEventListener('click',function(){document.getElementById('banner').remove();});</script>`));
+      case "/datadome-empty":
+        // DataDome: an empty page that only loads the captcha script; the captcha frame would appear later.
+        return html(200, `<!doctype html><html lang="fr"><head><title>Shop</title><script src="${thirdOrigin}/captcha-delivery.com/c.js"></script></head><body></body></html>`);
       case "/access-denied":
         // A block page served with HTTP 200 instead of the site: not measurable.
         return html(200, `<!doctype html><html lang="de"><head><title>Zugriff verweigert / Access denied</title></head><body><h1>Zugriff verweigert</h1><p>Aus Sicherheitsgründen mussten wir den Zugriff verweigern.</p></body></html>`);

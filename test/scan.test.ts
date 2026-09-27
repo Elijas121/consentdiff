@@ -148,10 +148,11 @@ describe("scan (real browser)", () => {
     await expect(scan(`${fx.origin}/bot-challenge`, opts())).rejects.toThrow(/bot check/);
     // A block page with HTTP 200 would otherwise produce "no imprint" and "no privacy link" errors.
     await expect(scan(`${fx.origin}/access-denied`, opts())).rejects.toThrow(/bot check/);
+    await expect(scan(`${fx.origin}/datadome-empty`, opts())).rejects.toThrow(/bot check/);
     // A hidden device check on a small ordinary page is no bot check.
     const contact = await scan(`${fx.origin}/contact-hidden-captcha`, opts());
     expect(contact.finalUrl).toBe(`${fx.origin}/contact-hidden-captcha`);
-  });
+  }, 30000);
 
   it("still measures a page whose load event never fires", async () => {
     const r = await scan(`${fx.origin}/slow-resource`, { ...opts(), timeoutMs: 20000 });

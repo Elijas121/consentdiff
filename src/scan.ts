@@ -232,7 +232,9 @@ async function runBaseline(
         ).filter((el) => {
           const r = el.getBoundingClientRect();
           return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== "hidden";
-        }).length,
+        }).length +
+          // DataDome serves an empty page that only loads its captcha script; the frame appears later.
+          (document.querySelector("script[src*='captcha-delivery.com']") && (document.body?.innerText || "").trim().length < 200 ? 1 : 0),
         textLength: (document.body?.innerText || "").length,
         links: document.querySelectorAll("a[href]").length,
       })),
