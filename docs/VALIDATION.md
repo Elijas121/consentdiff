@@ -173,6 +173,25 @@ One more problem was not a miss of a control: a large site answered the automate
 
 All six are fixed (wording, a second search by visible text, block pages recognized by their title), each with a test that fails without the fix. A rescan of the six sites finds and clicks the right controls and refuses the block page. These after-fix results are not blind any more; the blind numbers are the ones in the table.
 
+## Four more held-out samples (2026-09-27)
+
+The held-out sample above was repeated four times, each time with new sites (none of them in any earlier sample), the code frozen before the scan and the ground truth judged blind from the neutral screenshot by the AI assistant before any tool output was read. Samples 2 and 3 added small businesses from other industries and cities, small sites from the UK, France, the Netherlands, Italy, Spain and Poland, and large European sites.
+
+| Sample | Sites judged | B | R | A | Clicks on a wrong control |
+|---|---|---|---|---|---|
+| 1 (above) | 37 | 37/37 | 28/30 | 27/30 | 0 |
+| 2 | 36 | 34/36 | 20/22 | 20/22 | 0 |
+| 3 | 36 | 35/36 | 20/23 | 20/22 | 0 |
+
+Every sample found consent tools or wording the tool did not know yet, and every fix was followed by a rerun of all earlier sites. Two of those fixes had introduced new errors that only a fresh sample showed (a content-blocker rule that also matched a common consent tool's own class name; after the footer scroll, a web agency's credit link chosen over the site's own privacy link). Both are fixed and covered by tests.
+
+**Second engine.** On the 111 sites of samples 1 to 3, DuckDuckGo's autoconsent alone found 50 of 75 banners and rejected on 33 of 49 sites with a reject control, with no false detection. The tool's own search found 42 of those 49; both together 46. Since then autoconsent is asked when the own search finds no control, and its answer counts only when it clicked visible controls a visitor could click. Answers it gave through a consent tool's script alone (common on large news sites), by dismissing a pure notice, through hidden elements or through a "reject and subscribe" button are not used; the review of the rerun found each of these.
+
+**Samples 4 and 5 were judged against the two requirements for publishing, fixed in writing before the scan:** no click on anything but a general reject or accept, and no finding caused by a measurement error.
+
+- Sample 4 (39 measured sites) failed both: a consent tool's reject selector held "Zeitung PUR bestellen" (order the ad-free version) and was clicked; a footer that renders only when scrolled gave a false "no imprint"; a splash page without any link gave a "missing" that nothing could prove. All three are fixed: selector matches pass the label check, the page is scrolled to its end after the measurement before consent, and a page without links gets "unverifiable".
+- Sample 5 (29 measured sites) passed both: 32 clicks, each on a general reject or accept control (one answered by autoconsent through the consent tool's "Save" in its settings); both legal-link findings were checked by hand and are correct.
+
 ## Limits
 
 - **Few judges.** The ground truth of the 71-site samples was judged by the same AI assistant that tuned the heuristics. The 48-site sample was judged blind by one person, but its disagreements were settled by the AI assistant (with an independent second check). In the held-out sample the AI assistant and the owner judged independently, but the owner judged 28 of 37 sites. A second person judging a full sample is still missing.
