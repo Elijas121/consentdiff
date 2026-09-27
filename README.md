@@ -12,7 +12,7 @@ Measure what a website does before and after a visitor answers the cookie banner
 
 It reports technical findings with evidence. It gives no legal advice and does not decide whether a law is violated.
 
-> Status: early (0.1.1), [on npm](https://www.npmjs.com/package/consentprobe). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+> Status: early (0.1.2), [on npm](https://www.npmjs.com/package/consentprobe). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## Why another scanner?
 
@@ -25,7 +25,7 @@ A local test page whose banner ignores the reject click (not a real site). Run i
 ![consentprobe run against a local test page: the banner's reject click is ignored and tracking continues](docs/demo.gif)
 
 ```
-consentprobe 0.1.1  http://localhost:PORT/banner-bad
+consentprobe 0.1.2  http://localhost:PORT/banner-bad
 Phase: before-consent (no interaction with any cookie banner), then reject and accept visits
 Consent banner: recognized | reject: found ("Alle ablehnen") | accept: found ("Alle akzeptieren")
 2 error, 0 warn, 1 info | before consent: 0 third-party host(s), 1 request(s), 0 cookie(s)
@@ -127,7 +127,7 @@ Categories: `analytics`, `advertising`, `tag-manager`, `social`, `fonts`, `maps`
 `action.yml` is a composite GitHub Action. It installs the tool, scans the URL and writes the Markdown report into the job summary; if the page cannot be measured, the summary says why. In a public repository the job summary is public, so point it only at sites you own or are authorized to test:
 
 ```yaml
-- uses: Elijas121/consentprobe@v0.1.1   # or the release's commit SHA, which cannot be moved
+- uses: Elijas121/consentprobe@v0.1.2   # or the release's commit SHA, which cannot be moved
   with:
     url: https://staging.example.de
     fail-on: error

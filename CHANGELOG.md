@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2 (2026-09-27)
+
+No change to what the scanner measures or reports.
+
+- GitHub Action: `actions/setup-node` 7.0.0 (Node 24 runtime). 0.1.1 ran on the deprecated Node 20 runtime and printed a deprecation warning in every job that used it. Automatic package-manager caching stays off, so the action writes no cache into your workflow.
+- CI and release workflows: `actions/checkout` 7.0.1 and `actions/setup-node` 7.0.0.
+
 ## 0.1.1 (2026-09-27)
 
 No change to what the scanner measures or reports.
