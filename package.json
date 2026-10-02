@@ -1,12 +1,12 @@
 {
-  "name": "consentprobe",
-  "version": "0.1.5",
+  "name": "consentdiff",
+  "version": "0.2.0",
   "description": "Measure what a website really does before, and after, a visitor answers the cookie banner. Technical findings for GDPR/TDDDG work, not legal advice.",
   "author": "Elias Delil",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "consentprobe": "dist/cli.js"
+    "consentdiff": "dist/cli.js"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -51,10 +51,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Elijas121/consentprobe.git"
+    "url": "git+https://github.com/Elijas121/consentdiff.git"
   },
-  "homepage": "https://github.com/Elijas121/consentprobe#readme",
+  "homepage": "https://github.com/Elijas121/consentdiff#readme",
   "bugs": {
-    "url": "https://github.com/Elijas121/consentprobe/issues"
+    "url": "https://github.com/Elijas121/consentdiff/issues"
   }
 }

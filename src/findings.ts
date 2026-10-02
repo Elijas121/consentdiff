@@ -200,7 +200,7 @@ export function findingsForLegal(
   germanRules = true,
   /**
    * The domain (.de, .at, .ch, .li) or the user (--imprint always) says the operator is in a country
-   * with an imprint duty. A German-language page alone does not: consentprobe asks for German
+   * with an imprint duty. A German-language page alone does not: consentdiff asks for German
    * content, and many international sites serve it, so their missing imprint is only a warning.
    */
   imprintDutyLikely = true,
@@ -437,7 +437,7 @@ export function findingsForConsent(
       id: "reject-search-incomplete",
       severity: "info",
       message:
-        "An accept control was found, but parts of the page did not respond while consentprobe searched for a reject control. Whether the first layer has one is unknown; check the screenshots.",
+        "An accept control was found, but parts of the page did not respond while consentdiff searched for a reject control. Whether the first layer has one is unknown; check the screenshots.",
       evidence: [],
     });
   } else if ((banner.acceptFound || accept?.control?.method === "autoconsent") && !banner.rejectFound) {

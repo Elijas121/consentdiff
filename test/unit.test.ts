@@ -304,7 +304,7 @@ describe("report safety", () => {
   it("keeps page-controlled text on one printable line in text and Markdown reports", () => {
     const evil = "Alle\nablehnen\u001b[31m\u202Eevil\r::error::x";
     const r = {
-      tool: { name: "consentprobe", version: "0.0.0" },
+      tool: { name: "consentdiff", version: "0.0.0" },
       url: "https://e.de/",
       finalUrl: "https://e.de/\nfake",
       scannedAt: "2026-01-01T00:00:00.000Z",
@@ -378,7 +378,7 @@ describe("consent control labels", () => {
 
 describe("report and errors", () => {
   const base: ScanResult = {
-    tool: { name: "consentprobe", version: "0.0.0" },
+    tool: { name: "consentdiff", version: "0.0.0" },
     url: "https://e.de/",
     finalUrl: "https://e.de/",
     scannedAt: "2026-01-01T00:00:00.000Z",
@@ -407,7 +407,7 @@ describe("report and errors", () => {
   });
   it("explains a missing browser in one actionable line", () => {
     const err = explainLaunchError(new Error("browserType.launch: Executable doesn't exist at /x. Please run: npx playwright install"));
-    expect(err.message).toBe("The bundled Chromium is not installed yet. Install it once with: npx consentprobe --install-browser");
+    expect(err.message).toBe("The bundled Chromium is not installed yet. Install it once with: npx consentdiff --install-browser");
     expect(explainLaunchError(new Error("browserType.launch: Chromium distribution 'chrome' is not found at /opt/google/chrome/chrome")).message).toMatch(/Google Chrome is not installed/);
     expect(explainLaunchError(new Error("browserType.launch: Host system is missing dependencies to run browsers.")).message).toMatch(/--with-deps/);
     expect(explainLaunchError(new Error("boom")).message).toBe("boom");

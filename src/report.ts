@@ -63,7 +63,7 @@ function bannerLine(r: ScanResult, esc: (s: string) => string = (s) => s): strin
 
 export function formatText(r: ScanResult): string {
   const lines: string[] = [
-    `consentprobe ${r.tool.version}  ${plain(r.finalUrl)}`,
+    `consentdiff ${r.tool.version}  ${plain(r.finalUrl)}`,
     phaseLine(r),
     bannerLine(r, plain),
     `${r.summary.error} error, ${r.summary.warn} warn, ${r.summary.info} info | before consent: ${r.summary.thirdPartyHosts} third-party host(s), ${r.requests.length} request(s), ${r.cookies.length} cookie(s)`,
@@ -80,7 +80,7 @@ export function formatText(r: ScanResult): string {
 
 export function formatMarkdown(r: ScanResult): string {
   const lines: string[] = [
-    `# consentprobe report`,
+    `# consentdiff report`,
     "",
     `- URL: ${escapeMarkdown(r.finalUrl)}`,
     `- Scanned: ${r.scannedAt}`,

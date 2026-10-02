@@ -101,13 +101,13 @@ export class SetupError extends Error {
 export function explainLaunchError(err: unknown): Error {
   const message = err instanceof Error ? err.message : String(err);
   if (/distribution '?chrome'? is not found|chrome.*not found at/i.test(message)) {
-    return new SetupError("Google Chrome is not installed. Install it, or leave out --browser chrome to use the bundled Chromium (install it once with: consentprobe --install-browser).");
+    return new SetupError("Google Chrome is not installed. Install it, or leave out --browser chrome to use the bundled Chromium (install it once with: consentdiff --install-browser).");
   }
   if (/missing dependencies|shared libraries|install-deps|--with-deps/i.test(message)) {
-    return new SetupError("Chromium could not start because system libraries are missing. On Linux run once, with root rights: consentprobe --install-browser --with-deps");
+    return new SetupError("Chromium could not start because system libraries are missing. On Linux run once, with root rights: consentdiff --install-browser --with-deps");
   }
   if (/executable doesn't exist/i.test(message)) {
-    return new SetupError("The bundled Chromium is not installed yet. Install it once with: npx consentprobe --install-browser");
+    return new SetupError("The bundled Chromium is not installed yet. Install it once with: npx consentdiff --install-browser");
   }
   return new SetupError(message);
 }
@@ -123,7 +123,7 @@ const GONE = new Set([404, 410]);
 
 /**
  * True for hosts on the machine or the local network (localhost, private and link-local IPs). A page
- * must not make consentprobe request those, e.g. a cloud metadata address in a CI runner.
+ * must not make consentdiff request those, e.g. a cloud metadata address in a CI runner.
  */
 export function isLocalHost(host: string): boolean {
   const h = host.toLowerCase().replace(/^\[|\]$/g, "").replace(/\.$/, "");
@@ -315,7 +315,7 @@ async function runBaseline(
       legal.privacy.noLinksOnPage = true;
     }
     // The cookies were read before scrolling and before the link check: both can set cookies of their own.
-    // A page may point its legal links anywhere; never let it make consentprobe probe the local network.
+    // A page may point its legal links anywhere; never let it make consentdiff probe the local network.
     // Only a site the user typed as local (a dev server) may have its legal pages checked there, and
     // only the typed host itself: a redirect from it to another local address stays blocked.
     const typedHost = new URL(url).hostname;
@@ -526,7 +526,7 @@ export async function scan(rawUrl: string, options: ScanOptions = {}): Promise<S
     const count = (s: "error" | "warn" | "info") => findings.filter((f) => f.severity === s).length;
 
     return {
-      tool: { name: "consentprobe", version: VERSION, browser: `${options.browser === "chrome" ? "Chrome" : "Chromium"} ${browser.version()}`, playwright: PLAYWRIGHT_VERSION },
+      tool: { name: "consentdiff", version: VERSION, browser: `${options.browser === "chrome" ? "Chrome" : "Chromium"} ${browser.version()}`, playwright: PLAYWRIGHT_VERSION },
       url: url.href,
       finalUrl: withoutQuery(base.finalUrl),
       scannedAt: new Date().toISOString(),

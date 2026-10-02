@@ -1,6 +1,6 @@
 # Validation
 
-How well does consentprobe do what it claims? This file records the method, the numbers and the limits. Raw results name real companies and are therefore **not** in this repository.
+How well does consentdiff do what it claims? This file records the method, the numbers and the limits. Raw results name real companies and are therefore **not** in this repository.
 
 Date: 2026-09-24/25. Version: 0.1.0. The blind sample judged by a person is described in its own section below.
 

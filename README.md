@@ -1,10 +1,10 @@
-# consentprobe
+# consentdiff
 
-[![npm](https://img.shields.io/npm/v/consentprobe)](https://www.npmjs.com/package/consentprobe) [![CI](https://github.com/Elijas121/consentprobe/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Elijas121/consentprobe/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![npm](https://img.shields.io/npm/v/consentdiff)](https://www.npmjs.com/package/consentdiff) [![CI](https://github.com/Elijas121/consentdiff/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Elijas121/consentdiff/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 Measure what a website does before and after a visitor answers the cookie banner.
 
-`consentprobe` loads a page in a real browser three times, each visit with its own empty cookie jar:
+`consentdiff` loads a page in a real browser three times, each visit with its own empty cookie jar:
 
 1. **Baseline:** no interaction. Which third parties are contacted, which cookies are set?
 2. **Reject:** click the banner's reject control. Does tracking stop?
@@ -12,20 +12,20 @@ Measure what a website does before and after a visitor answers the cookie banner
 
 It reports technical findings with evidence. It gives no legal advice and does not decide whether a law is violated.
 
-> Status: early (0.1.5), [on npm](https://www.npmjs.com/package/consentprobe). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+> Status: early (0.2.0), [on npm](https://www.npmjs.com/package/consentdiff). Changes are listed in [CHANGELOG.md](CHANGELOG.md). Until 0.1.5 this project was published under another name (npm package `consentprobe`, deprecated); it has no connection to any product of that name.
 
 ## Why another scanner?
 
-Most open-source privacy scanners (Webbkoll, blacklight) measure only the first page load. Tools that do click banners, such as DuckDuckGo's autoconsent or Consent-O-Matic, answer the banner for you instead of testing what the site does afterwards, and research crawlers are not built for a site owner's pre-launch check. Under § 25 TDDDG and the GDPR the interesting part is often what happens after the visitor clicks "reject". `consentprobe` tests that path, compares it with the baseline and keeps screenshots as evidence, as a CLI, a GitHub Action, a library and an agent skill.
+Most open-source privacy scanners (Webbkoll, blacklight) measure only the first page load. Tools that do click banners, such as DuckDuckGo's autoconsent or Consent-O-Matic, answer the banner for you instead of testing what the site does afterwards, and research crawlers are not built for a site owner's pre-launch check. Under § 25 TDDDG and the GDPR the interesting part is often what happens after the visitor clicks "reject". `consentdiff` tests that path, compares it with the baseline and keeps screenshots as evidence, as a CLI, a GitHub Action, a library and an agent skill.
 
 ## Example
 
 A local test page whose banner ignores the reject click (not a real site). Run it yourself with `pnpm demo`.
 
-![consentprobe run against a local test page: the banner's reject click is ignored and tracking continues](docs/demo.gif)
+![consentdiff run against a local test page: the banner's reject click is ignored and tracking continues](docs/demo.gif)
 
 ```
-consentprobe 0.1.5  http://localhost:PORT/banner-bad
+consentdiff 0.2.0  http://localhost:PORT/banner-bad
 Phase: before-consent (no interaction with any cookie banner), then reject and accept visits
 Consent banner: recognized | reject: found ("Alle ablehnen") | accept: found ("Alle akzeptieren")
 2 error, 0 warn, 1 info | before consent: 0 third-party host(s), 1 request(s), 0 cookie(s)
@@ -69,20 +69,20 @@ Technical findings only. This is not legal advice and does not assess whether a 
 Needs Node 22 or newer:
 
 ```bash
-npx consentprobe --install-browser   # once: the Chromium build it was tested with
-npx consentprobe example.de
+npx consentdiff --install-browser   # once: the Chromium build it was tested with
+npx consentdiff example.de
 ```
 
 On Linux, add `--with-deps` to `--install-browser` once to install Chromium's system libraries (needs root). `https://` is added when the URL has none (`http://` for `localhost` and IP addresses).
 
-Common options (shown with `consentprobe` for short):
+Common options (shown with `consentdiff` for short):
 
 ```bash
-consentprobe example.de --format md --out ~/consentprobe-reports/example.md
-consentprobe example.de --format json --fail-on warn
-consentprobe example.de --screenshots ~/consentprobe-evidence/example
-consentprobe example.de --first-party assets.example-cdn.de
-consentprobe https://user:password@staging.example.de   # a password-protected test site
+consentdiff example.de --format md --out ~/consentdiff-reports/example.md
+consentdiff example.de --format json --fail-on warn
+consentdiff example.de --screenshots ~/consentdiff-evidence/example
+consentdiff example.de --first-party assets.example-cdn.de
+consentdiff https://user:password@staging.example.de   # a password-protected test site
 ```
 
 Reports and screenshots of real sites name real companies: keep them outside any repository you publish.
@@ -90,7 +90,7 @@ Reports and screenshots of real sites name real companies: keep them outside any
 From a checkout instead (Node 22+ and pnpm 11):
 
 ```bash
-git clone https://github.com/Elijas121/consentprobe.git && cd consentprobe
+git clone https://github.com/Elijas121/consentdiff.git && cd consentdiff
 pnpm install
 node dist/cli.js --install-browser
 node dist/cli.js example.de
@@ -128,25 +128,25 @@ Categories: `analytics`, `advertising`, `tag-manager`, `social`, `fonts`, `maps`
 `action.yml` is a composite GitHub Action. It installs the tool, scans the URL and writes the Markdown report into the job summary; if the page cannot be measured, the summary says why. In a public repository the job summary is public, so point it only at sites you own or are authorized to test:
 
 ```yaml
-- uses: Elijas121/consentprobe@v0.1.5   # or the release's commit SHA, which cannot be moved
+- uses: Elijas121/consentdiff@v0.2.0   # or the release's commit SHA, which cannot be moved
   with:
     url: https://staging.example.de
     fail-on: error
 ```
 
-The action needs no checkout step and no npm install; it brings its own Chromium. Inputs: `url` (required), `fail-on` (`error`, `warn` or `never`), `imprint` (`auto`, `always`, `never`), `first-party` (one extra domain of the operator) and `report` (path of the Markdown report, default `consentprobe-report.md`).
+The action needs no checkout step and no npm install; it brings its own Chromium. Inputs: `url` (required), `fail-on` (`error`, `warn` or `never`), `imprint` (`auto`, `always`, `never`), `first-party` (one extra domain of the operator) and `report` (path of the Markdown report, default `consentdiff-report.md`).
 
 Good to know: the action sets up Node 22 and pnpm for the rest of the job. GitHub-hosted runners are mostly in the US; a consent tool that shows its banner only to EU visitors may show none there, and the findings then describe the US experience. For EU results use a self-hosted runner in the EU.
 
 ## Use it as a library
 
 ```bash
-npm install consentprobe
-npx consentprobe --install-browser   # once: the Chromium build the library drives
+npm install consentdiff
+npx consentdiff --install-browser   # once: the Chromium build the library drives
 ```
 
 ```ts
-import { scan, formatText } from "consentprobe";
+import { scan, formatText } from "consentdiff";
 
 const result = await scan("https://example.de", { screenshotDir: "./evidence" });
 console.log(formatText(result));
@@ -157,11 +157,11 @@ if (result.summary.error > 0) process.exitCode = 1;
 
 ## Use it with a coding agent
 
-`skills/consentprobe/SKILL.md` teaches Claude Code and similar agents to run the scan, read the JSON and explain each finding with a concrete fix, without legal conclusions. Install it for Claude Code:
+`skills/consentdiff/SKILL.md` teaches Claude Code and similar agents to run the scan, read the JSON and explain each finding with a concrete fix, without legal conclusions. Install it for Claude Code:
 
 ```bash
-mkdir -p ~/.claude/skills/consentprobe
-curl -fsSL https://raw.githubusercontent.com/Elijas121/consentprobe/main/skills/consentprobe/SKILL.md -o ~/.claude/skills/consentprobe/SKILL.md
+mkdir -p ~/.claude/skills/consentdiff
+curl -fsSL https://raw.githubusercontent.com/Elijas121/consentdiff/main/skills/consentdiff/SKILL.md -o ~/.claude/skills/consentdiff/SKILL.md
 ```
 
 Then ask, for example, "check example.de for tracking before consent". Other agents that read `SKILL.md` files take the same file in their own skills folder.
@@ -169,11 +169,11 @@ Then ask, for example, "check example.de for tracking before consent". Other age
 ## Limits
 
 - **Location.** A banner may not appear from your IP address (some sites show one only in the EU), and a site may behave differently there. "No banner recognized" does not mean the site has none.
-- **Browser identity.** Headless Chromium calls itself "HeadlessChrome", and many large sites then hide their banner and behave differently. `consentprobe` therefore presents itself like the same Chromium in a normal window (user agent, client hints, German language). It does not hide that the browser is automated (`navigator.webdriver` stays `true`), and a site that answers with a bot check or HTTP 403 is not measured.
+- **Browser identity.** Headless Chromium calls itself "HeadlessChrome", and many large sites then hide their banner and behave differently. `consentdiff` therefore presents itself like the same Chromium in a normal window (user agent, client hints, German language). It does not hide that the browser is automated (`navigator.webdriver` stays `true`), and a site that answers with a bot check or HTTP 403 is not measured.
 - **First layer only.** Choices behind "Settings" are not explored. A site that redirects to a separate full-page consent page is tested on that page; its legal links are not judged there.
 - **One visit is a sample.** Some sites race their tags against their consent tool and set tracking cookies on one visit but not on the next. Before you sign a site off, scan it at least twice; a finding that shows up once is real for that visit.
 - **One page per run.** No crawling; a password-protected test site works with credentials in the URL (they are sent only to that origin).
-- **Two engines.** consentprobe first looks for the controls itself (known consent-tool selectors, whole labels in seven languages). When it finds none, it asks [DuckDuckGo's autoconsent](https://github.com/duckduckgo/autoconsent) (MPL-2.0, rules for several hundred consent tools). Its answer counts only when it clicked visible controls a visitor could click (never a bare OK, a hidden element, an accept or a subscribe option, and never an answer through the consent tool's script alone). autoconsent may reject through a settings layer; the report says so ("not on the first layer, answered by autoconsent") and keeps the warning that the first layer has no reject control.
+- **Two engines.** consentdiff first looks for the controls itself (known consent-tool selectors, whole labels in seven languages). When it finds none, it asks [DuckDuckGo's autoconsent](https://github.com/duckduckgo/autoconsent) (MPL-2.0, rules for several hundred consent tools). Its answer counts only when it clicked visible controls a visitor could click (never a bare OK, a hidden element, an accept or a subscribe option, and never an answer through the consent tool's script alone). autoconsent may reject through a settings layer; the report says so ("not on the first layer, answered by autoconsent") and keeps the warning that the first layer has no reject control.
 - **Wording.** Controls are matched by known consent-platform selectors and by whole labels in German, English, French, Italian, Spanish, Dutch and Polish, only inside an overlay or a container the site names as its cookie banner, and only when that overlay talks about cookies, consent or privacy. Unusual wording is reported as "not found", never guessed.
 - **The tracker list is hand-curated and incomplete.** Unknown hosts appear as info. Lists such as DuckDuckGo Tracker Radar, Disconnect and Ghostery TrackerDB are CC BY-NC-SA and therefore not bundled.
 - **Consent Mode.** A tag manager can load before consent and still block its tags, so tag managers are warnings; the analytics and advertising findings show what was actually sent.

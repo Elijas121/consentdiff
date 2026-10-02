@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping. consentprobe measures what websites do with consent, and a wrong finding about a real company is the worst thing it can produce. That shapes how changes are made.
+Thanks for helping. consentdiff measures what websites do with consent, and a wrong finding about a real company is the worst thing it can produce. That shapes how changes are made.
 
 ## Before you start
 

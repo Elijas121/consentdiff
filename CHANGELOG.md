@@ -1,8 +1,14 @@
 # Changelog
 
+## 0.2.0 (2026-10-02)
+
+- Renamed from `consentprobe` to `consentdiff`: npm package, command, GitHub repository, GitHub Action and agent skill (`skills/consentdiff`). The name `consentprobe` is used by an unrelated commercial service, and a tool in the same field should not share it. Behaviour and findings are unchanged from 0.1.5.
+- Migration: replace `npx consentprobe` with `npx consentdiff`, `Elijas121/consentprobe@v0.1.x` with `Elijas121/consentdiff@v0.2.0`, and re-install the skill from the new path (see README). The default report file is now `consentdiff-report.md`. The old npm package is deprecated and points here.
+- Entries below keep the commands as they were written under the old name where noted; older text was renamed mechanically.
+
 ## 0.1.5 (2026-09-27)
 
-- When the browser is missing, the hint now reads `npx consentprobe --install-browser`, which works for npx, global and library installs alike. 0.1.4 said `consentprobe --install-browser`, which fails with "command not found" after `npx consentprobe`.
+- When the browser is missing, the hint now reads `npx consentdiff --install-browser`, which works for npx, global and library installs alike. 0.1.4 said `consentdiff --install-browser`, which fails with "command not found" after `npx consentdiff`.
 
 ## 0.1.4 (2026-09-27)
 

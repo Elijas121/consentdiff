@@ -4,7 +4,7 @@ import type { Frame, Page } from "playwright";
 
 /**
  * Second engine: DuckDuckGo's autoconsent (MPL-2.0), a maintained rule set for several hundred consent
- * tools. consentprobe asks it only when its own search found no control. It can also reject through a
+ * tools. consentdiff asks it only when its own search found no control. It can also reject through a
  * settings layer, which the report keeps apart from a reject control on the first layer.
  */
 

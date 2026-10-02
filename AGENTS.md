@@ -1,10 +1,10 @@
-# AGENTS.md for consentprobe
+# AGENTS.md for consentdiff
 
 Read this file first. It is the single hand-over document for any AI agent or human working on this repository.
 
 ## What this project is
 
-`consentprobe` is a Node/TypeScript CLI (plus library and agent skill) that loads a website in Playwright three times, each with a fresh cookie jar (baseline, reject click, accept click), and reports technical privacy findings with evidence. It gives **no legal advice**.
+`consentdiff` is a Node/TypeScript CLI (plus library and agent skill) that loads a website in Playwright three times, each with a fresh cookie jar (baseline, reject click, accept click), and reports technical privacy findings with evidence. It gives **no legal advice**.
 
 Maintainer: Elias Delil. Code, comments, commits and docs are in English.
 
@@ -51,7 +51,7 @@ test/
   scan.test.ts  baseline with a real browser
   consent.test.ts  click test with a real browser
 scripts/scan-list.sh  scan a list of URLs in parallel for regression checks
-skills/consentprobe/SKILL.md  agent skill
+skills/consentdiff/SKILL.md  agent skill
 action.yml      composite GitHub Action (smoke-tested in CI)
 docs/RESEARCH.md    prior art and tracker-data licenses
 docs/VALIDATION.md  validation method, numbers and limits
@@ -102,7 +102,7 @@ pnpm trap: a `pnpm-workspace.yaml` in a parent directory makes pnpm treat this r
 - **Error pages are not measured** (HTTP >= 400 throws `PageNotMeasurableError`, a bot check with HTTP 200 throws `PageChallengedError`). Otherwise a 403 page produced "no imprint" errors. 401 is explained as a login wall; credentials in the URL are used as basic auth and removed from the result.
 - **Unverifiable is not an error.** A legal link counts as broken only on 404 or 410. No response, a transient error or a refusal of the plain HTTP client (401, 403 …) is info. The check never requests local or private addresses for a public page, and cookies are read before it runs.
 - **Tag manager = warn.** Consent Mode can block tags; analytics and advertising findings carry the real weight.
-- **German rules only for German-looking sites** (`lang="de"`, .de/.at/.li, a .ch domain without another page language, or `--imprint always`). A missing privacy link is then an error. A missing imprint is an error only on a .de/.at/.ch/.li domain (or with `--imprint always`); on a German-language page elsewhere it is a warning, because consentprobe asks for German content and many international sites serve it. Elsewhere the imprint check is skipped (info) and a missing privacy link is a warning.
+- **German rules only for German-looking sites** (`lang="de"`, .de/.at/.li, a .ch domain without another page language, or `--imprint always`). A missing privacy link is then an error. A missing imprint is an error only on a .de/.at/.ch/.li domain (or with `--imprint always`); on a German-language page elsewhere it is a warning, because consentdiff asks for German content and many international sites serve it. Elsewhere the imprint check is skipped (info) and a missing privacy link is a warning.
 - **Legal link text.** `innerText`, or `textContent` when the link has a box but renders lazily (content-visibility). A link without a box keeps no label and ends up "uncertain".
 - **Legal items without href.** Only when no real link matches: a visible, clickable element (onclick, tabindex, link or button role, `cursor: pointer`) whose whole text is the standard wording ("Impressum", "Datenschutz", …) counts as found. Its target cannot be checked, which is reported as info. Plain text that cannot be clicked never counts.
 - **Query strings are stripped** from recorded request URLs, the final URL and legal links. Page text in reports and errors is reduced to printable characters (no line breaks, escape sequences or bidi overrides).
@@ -141,7 +141,7 @@ pnpm trap: a `pnpm-workspace.yaml` in a parent directory makes pnpm treat this r
 | "Accept everything" not recognized | English wording unknown | pattern plus test |
 | A reject control "found" that was the label of a category checkbox ("Essential", "Notwendige Cookies", "Erforderliche Cookies"); the click failed, and the missing-reject warning was not raised | the strict reject pattern matches bare category names, and the plain-control search took a clickable `<label>` for a control | checkbox labels, switches, tabs and accordion headers never count as a decision; tests break both search paths on purpose |
 | "I Accept All" and "Accept Only Essential Cookies" not recognized | English wording unknown | patterns plus tests for mixed choices that must not match |
-| "No imprint" error on international sites (a large code host, a software vendor, a video platform) | consentprobe asks for German content, the sites served it, and German language alone triggered the imprint rule | error only on .de/.at/.ch/.li domains, a warning otherwise |
+| "No imprint" error on international sites (a large code host, a software vendor, a video platform) | consentdiff asks for German content, the sites served it, and German language alone triggered the imprint rule | error only on .de/.at/.ch/.li domains, a warning otherwise |
 | "YouTube contacted before consent" on youtube.com, "Google Fonts" on google.com | the operator's own domains counted as third parties | same-company domain map; such services listed as info |
 | "Google Fonts: self-host them" on a site with only a YouTube embed or reCAPTCHA | Google's own iframes load Roboto for themselves | requests remember their frame; fonts/CDN files from third-party frames are not blamed on the site |
 | A tracker "contacted" that never left the browser | the page's own CSP blocked it, but Chromium still fires a request event | requests failed with `csp`/`mixed-content` are dropped |
@@ -163,7 +163,7 @@ A theory that turned out wrong: a banner dialog looked like a marketing mock-up,
 - **Validation:** 71 real sites in three samples, two of them judged blind, each scanned three times. See `docs/VALIDATION.md` for method, numbers and limits. Raw results with site names are kept out of the repo.
 - **Tracking after reject is verified on real sites:** three screenshot-checked cases (a HubSpot click pixel; Microsoft Clarity sending data after reject; Clarity loaded only after "Decline"). No site names in the repo.
 - **Blind validation by a person** (48 small and large sites) and a hostile review in eight lenses (false findings, clicks, robustness, security, docs, packaging, ethics, tests) are done; see `docs/VALIDATION.md`.
-- GitHub: public repo `Elijas121/consentprobe`. CI: tests on Node 22/24/26, `package` installs the tarball, `action-smoke` runs the composite action against https://example.com.
+- GitHub: public repo `Elijas121/consentdiff`. CI: tests on Node 22/24/26, `package` installs the tarball, `action-smoke` runs the composite action against https://example.com.
 - Not done: npm publish (needs the maintainer's npm account and a trusted publisher for `release.yml`).
 
 ## Next steps

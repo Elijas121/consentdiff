@@ -14,7 +14,7 @@ shots/
 urls*.txt
 report.md
 report.json
-consentprobe-report.md
+consentdiff-report.md
 
 # Local tooling and private notes
 .DS_Store

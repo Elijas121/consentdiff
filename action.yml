@@ -1,4 +1,4 @@
-name: consentprobe
+name: consentdiff
 description: "Test what a website does before and after the cookie banner: trackers before consent, after reject and after accept."
 author: Elias Delil
 branding:
@@ -20,7 +20,7 @@ inputs:
     default: ""
   report:
     description: Path of the Markdown report file
-    default: consentprobe-report.md
+    default: consentdiff-report.md
 
 runs:
   using: composite
@@ -29,7 +29,7 @@ runs:
       with:
         node-version: 22
         package-manager-cache: false
-    - name: Install consentprobe
+    - name: Install consentdiff
       shell: bash
       working-directory: ${{ github.action_path }}
       run: |
@@ -49,13 +49,13 @@ runs:
         args=("$CP_URL" --format md --out "$CP_REPORT" --fail-on "$CP_FAIL_ON" --imprint "$CP_IMPRINT")
         if [ -n "$CP_FIRST_PARTY" ]; then args+=(--first-party "$CP_FIRST_PARTY"); fi
         rm -f "$CP_REPORT"
-        err="$RUNNER_TEMP/consentprobe-stderr.txt"
+        err="$RUNNER_TEMP/consentdiff-stderr.txt"
         set +e
         node "$GITHUB_ACTION_PATH/dist/cli.js" "${args[@]}" 2> "$err"
         code=$?
         set -e
         # The error text can quote the scanned page: never let it act as a workflow command.
-        token="consentprobe-$RANDOM$RANDOM$RANDOM"
+        token="consentdiff-$RANDOM$RANDOM$RANDOM"
         echo "::stop-commands::$token"
         cat "$err"
         echo "::$token::"
@@ -63,7 +63,7 @@ runs:
           cat "$CP_REPORT" >> "$GITHUB_STEP_SUMMARY"
         elif [ -s "$err" ]; then
           # An indented code block cannot be closed by the quoted text.
-          { echo "### consentprobe could not measure the page"; echo; sed 's/^/    /' "$err"; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "### consentdiff could not measure the page"; echo; sed 's/^/    /' "$err"; } >> "$GITHUB_STEP_SUMMARY"
         fi
         # fail-on: never means never for the page: findings (1) and a page that cannot be measured (2)
         # do not fail the job. A usage or setup error (3), e.g. a mistyped input, always does.

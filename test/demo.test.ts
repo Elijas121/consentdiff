@@ -8,7 +8,7 @@ test("runDemo targets local banner fixture and closes servers", async () => {
   let seenUrl = "";
   let seenScreenshotsDir = "";
   let seenRules = "";
-  const dir = await mkdtemp(join(tmpdir(), "consentprobe-demo-test-"));
+  const dir = await mkdtemp(join(tmpdir(), "consentdiff-demo-test-"));
 
   const result = await runDemo({
     mkTempDir: async () => dir,

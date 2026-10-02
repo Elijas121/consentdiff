@@ -78,7 +78,7 @@ export async function startFixtures(): Promise<Fixtures> {
       // A consent platform frame that answers headless browsers differently (it sees only its own headers).
       const bot = /HeadlessChrome/.test(`${req.headers["user-agent"] ?? ""} ${req.headers["sec-ch-ua"] ?? ""}`);
       res.writeHead(200, { "content-type": "text/html" });
-      res.end(bot ? "<script>parent.postMessage('consentprobe-fixture-bot','*')</script>" : "<p>ok</p>");
+      res.end(bot ? "<script>parent.postMessage('consentdiff-fixture-bot','*')</script>" : "<p>ok</p>");
       return;
     }
     if (req.url?.startsWith("/embed-frame")) {
@@ -185,7 +185,7 @@ export async function startFixtures(): Promise<Fixtures> {
         if (/HeadlessChrome/.test(agent)) {
           return html(200, page(`<h1>Bot view</h1>${FOOTER}`, `<script src="${thirdOrigin}/analytics.js"></script>`));
         }
-        const hideForBots = `<iframe src="${thirdOrigin}/bot-check" title="cmp" style="width:1px;height:1px;border:0"></iframe><script>function botView(){var b=document.getElementById('banner');if(!b)return;b.remove();var s=document.createElement('script');s.src='${thirdOrigin}/analytics.js';document.head.appendChild(s);}if(((navigator.userAgentData||{}).brands||[]).some(function(b){return /HeadlessChrome/.test(b.brand)}))botView();addEventListener('message',function(e){if(e.data==='consentprobe-fixture-bot')botView();});</script>`;
+        const hideForBots = `<iframe src="${thirdOrigin}/bot-check" title="cmp" style="width:1px;height:1px;border:0"></iframe><script>function botView(){var b=document.getElementById('banner');if(!b)return;b.remove();var s=document.createElement('script');s.src='${thirdOrigin}/analytics.js';document.head.appendChild(s);}if(((navigator.userAgentData||{}).brands||[]).some(function(b){return /HeadlessChrome/.test(b.brand)}))botView();addEventListener('message',function(e){if(e.data==='consentdiff-fixture-bot')botView();});</script>`;
         return html(200, bannerPage("good", thirdOrigin).replace("</main>", `${hideForBots}</main>`));
       }
       case "/banner-plain-controls":
@@ -230,7 +230,7 @@ export async function startFixtures(): Promise<Fixtures> {
       case "/legal-cookie":
         return html(200, page(`<h1>Legal cookie</h1><footer><a href="/impressum-cookie">Impressum</a> <a href="/datenschutz">Datenschutz</a></footer>`));
       case "/impressum-cookie":
-        // A legal page that sets a cookie of its own: consentprobe's link check must not count it.
+        // A legal page that sets a cookie of its own: consentdiff's link check must not count it.
         return html(200, page(`<h1>Impressum</h1>`), { "set-cookie": "legal_check=1; Path=/; Max-Age=3600" });
       case "/redirect-away":
         return html(302, "", { location: `${thirdOrigin}/landing?back=${encodeURIComponent(`http://localhost:${firstPort}`)}` });
@@ -377,7 +377,7 @@ export async function startFixtures(): Promise<Fixtures> {
             "</main>",
             `<script>var b=document.getElementById('banner');
               function showBanner(ms){setTimeout(function(){b.style.display='block';},ms);}
-              if(typeof window.__consentprobeMark==='function'){fetch('/late-ticket').then(function(r){return r.text();}).then(function(a){showBanner(a==='delay'?3000:0);});}
+              if(typeof window.__consentdiffMark==='function'){fetch('/late-ticket').then(function(r){return r.text();}).then(function(a){showBanner(a==='delay'?3000:0);});}
               else{showBanner(0);}
             </script></main>`,
           ));

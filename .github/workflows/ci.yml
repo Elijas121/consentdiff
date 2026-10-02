@@ -53,7 +53,7 @@ jobs:
           fail-on: never
           imprint: never
       - name: The action wrote a report
-        run: test -s consentprobe-report.md
+        run: test -s consentdiff-report.md
 
   package:
     # Installs the packed tarball like a user would and runs the installed CLI.
@@ -74,14 +74,14 @@ jobs:
         working-directory: ${{ runner.temp }}
         run: |
           mkdir user && cd user && npm init -y >/dev/null
-          npm install ../consentprobe-*.tgz
-          npx consentprobe --version
-          npx consentprobe --install-browser --with-deps
+          npm install ../consentdiff-*.tgz
+          npx consentdiff --version
+          npx consentdiff --install-browser --with-deps
           set +e
-          npx consentprobe https://example.com --no-click-test --imprint never --format json --out report.json
+          npx consentdiff https://example.com --no-click-test --imprint never --format json --out report.json
           code=$?
           set -e
           node -e "const r=require('./report.json'); if (!r.tool.browser || !r.finalUrl) process.exit(1)"
           # Exit codes: 0 = passed, 1 = findings at or above --fail-on, 2 = page not measurable, 3 = usage error.
           [ "$code" -le 1 ]
-          npx consentprobe a.example b.example && exit 1 || [ $? -eq 3 ]
+          npx consentdiff a.example b.example && exit 1 || [ $? -eq 3 ]

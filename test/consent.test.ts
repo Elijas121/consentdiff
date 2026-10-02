@@ -110,7 +110,7 @@ describe("consent click test (real browser)", () => {
     const { mkdtemp, readdir } = await import("node:fs/promises");
     const { tmpdir } = await import("node:os");
     const { join } = await import("node:path");
-    const dir = await mkdtemp(join(tmpdir(), "consentprobe-"));
+    const dir = await mkdtemp(join(tmpdir(), "consentdiff-"));
     await scan(`${fx.origin}/banner-good`, { ...opts(), screenshotDir: dir });
     expect((await readdir(dir)).sort()).toEqual([
       "accept-1-before-click.png",
@@ -146,7 +146,7 @@ describe("consent click test (real browser)", () => {
     const { mkdtemp } = await import("node:fs/promises");
     const { tmpdir } = await import("node:os");
     const { join } = await import("node:path");
-    for (const screenshotDir of [undefined, await mkdtemp(join(tmpdir(), "consentprobe-hb-"))]) {
+    for (const screenshotDir of [undefined, await mkdtemp(join(tmpdir(), "consentdiff-hb-"))]) {
       const r = await scan(`${fx.origin}/banner-heartbeat`, { ...opts(), screenshotDir });
       expect(r.consent?.reject?.clicked).toBe(true);
       expect(find(r, "third-party-before-consent:test-analytics")?.severity).toBe("error");

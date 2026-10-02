@@ -1,9 +1,9 @@
 ---
-name: consentprobe
-description: Measure what a website does before and after the cookie banner (third-party requests, tracker cookies, reject and accept behavior, imprint and privacy links) with the consentprobe CLI, then explain the findings and concrete fixes. Use when the user asks to check a site for cookie consent, GDPR/TDDDG behavior, tracking before consent, Google Fonts, or a pre-launch privacy check.
+name: consentdiff
+description: Measure what a website does before and after the cookie banner (third-party requests, tracker cookies, reject and accept behavior, imprint and privacy links) with the consentdiff CLI, then explain the findings and concrete fixes. Use when the user asks to check a site for cookie consent, GDPR/TDDDG behavior, tracking before consent, Google Fonts, or a pre-launch privacy check.
 ---
 
-# consentprobe
+# consentdiff
 
 Runs a real browser against a URL in three isolated visits (baseline, reject click, accept click) and reports technical findings. It measures behavior. It is **not** legal advice.
 
@@ -18,8 +18,8 @@ Runs a real browser against a URL in three isolated visits (baseline, reject cli
 From npm, Node 22 or newer:
 
 ```bash
-npx consentprobe --install-browser          # once
-npx consentprobe <url> --format json --screenshots /tmp/consentprobe-evidence --fail-on never
+npx consentdiff --install-browser          # once
+npx consentdiff <url> --format json --screenshots /tmp/consentdiff-evidence --fail-on never
 ```
 
 Keep reports and screenshots of real sites outside any repository.

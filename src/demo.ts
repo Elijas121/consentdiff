@@ -31,7 +31,7 @@ async function runBuiltCli(url: string, screenshotDir: string, rulesFile: string
 }
 
 export async function runDemo(deps: DemoDeps = {}): Promise<DemoResult> {
-  const mkTempDir = deps.mkTempDir ?? (() => mkdtemp(join(tmpdir(), "consentprobe-demo-")));
+  const mkTempDir = deps.mkTempDir ?? (() => mkdtemp(join(tmpdir(), "consentdiff-demo-")));
   const runCli = deps.runCli ?? runBuiltCli;
   const screenshotDir = await mkTempDir();
 

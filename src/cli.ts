@@ -10,10 +10,10 @@ import { scan, SetupError } from "./scan.js";
 import { VERSION } from "./version.js";
 import type { ScanOptions, Severity } from "./types.js";
 
-const HELP = `consentprobe ${VERSION}
+const HELP = `consentdiff ${VERSION}
 Measure what a website does before and after a visitor answers the cookie banner.
 
-Usage: consentprobe <url> [options]      (https:// is added when the URL has no scheme)
+Usage: consentdiff <url> [options]      (https:// is added when the URL has no scheme)
 
 Options:
   --format <text|json|md>   Output format (default: text)
@@ -32,7 +32,7 @@ Options:
                             always = force them (imprint check, missing privacy link is an error);
                             never = no imprint check (default: auto)
   --rules <file>            JSON file with extra tracker rules
-  --install-browser         Download the Chromium version this consentprobe was tested with, then exit
+  --install-browser         Download the Chromium version this consentdiff was tested with, then exit
                             (add --with-deps on Linux to install system libraries too; needs root)
   -h, --help                Show this help
   -v, --version             Show the version
@@ -47,12 +47,12 @@ Technical findings only; this is not legal advice.`;
  */
 function fail(message: string, code: 2 | 3 = 3): void {
   // Error texts can quote the page (a thrown script error); keep them to one printable line.
-  process.stderr.write(`consentprobe: ${plain(message)}\n`);
+  process.stderr.write(`consentdiff: ${plain(message)}\n`);
   process.exitCode = code;
 }
 
 /**
- * Run the installer of the Playwright version bundled with consentprobe, so the browser matches it.
+ * Run the installer of the Playwright version bundled with consentdiff, so the browser matches it.
  * A plain "npx playwright install" may fetch a newer Playwright whose browser build does not fit.
  */
 async function installBrowser(withDeps: boolean): Promise<void> {

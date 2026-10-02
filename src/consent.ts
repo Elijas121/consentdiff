@@ -322,7 +322,7 @@ async function bySelector(page: Page, selector: string, q: QueryBudget): Promise
   return undefined;
 }
 
-const PLAIN_MARK = "data-consentprobe-control";
+const PLAIN_MARK = "data-consentdiff-control";
 
 /**
  * Some banners build their controls from plain elements (an <a> without href, a <div> with a click
@@ -651,7 +651,7 @@ export async function runConsentSession(
     // Labels of the elements clicked while armed: autoconsent's clicks are judged by the same rules.
     const clickedLabels: string[] = [];
     const hiddenClicks: string[] = [];
-    await context.exposeBinding("__consentprobeMark", (_source: unknown, type: unknown, label: unknown, visible: unknown) => {
+    await context.exposeBinding("__consentdiffMark", (_source: unknown, type: unknown, label: unknown, visible: unknown) => {
       if (!armed) return;
       if (clickMarker === undefined) clickMarker = raw.length;
       if (type === "click" && typeof label === "string") {
@@ -665,7 +665,7 @@ export async function runConsentSession(
         const label = t ? ((t as HTMLElement).innerText || (t as HTMLInputElement).value || t.getAttribute("aria-label") || "").replace(/\s+/g, " ").trim() : "";
         const r = t ? t.getBoundingClientRect() : null;
         const visible = !!t && !!r && r.width > 0 && r.height > 0 && getComputedStyle(t).visibility !== "hidden";
-        (window as unknown as { __consentprobeMark?: (type: string, label: string, visible: boolean) => void }).__consentprobeMark?.(e.type, label, visible);
+        (window as unknown as { __consentdiffMark?: (type: string, label: string, visible: boolean) => void }).__consentdiffMark?.(e.type, label, visible);
       };
       // "click" too: autoconsent clicks from a page script, which fires no pointerdown.
       for (const type of ["pointerdown", "mousedown", "click"]) document.addEventListener(type, mark, { capture: true });
@@ -714,7 +714,7 @@ export async function runConsentSession(
         banner.overlayHint = undefined;
       }
       // autoconsent answers a pure notice ("OK") as an opt-out and may take a "reject and subscribe"
-      // button. Its clicks must pass the same rules as consentprobe's own: nothing that accepts,
+      // button. Its clicks must pass the same rules as consentdiff's own: nothing that accepts,
       // dismisses a notice or subscribes counts as a reject, and a bare dismissal is no accept.
       // Only an answer a visitor could give counts: at least one click, and no click on a hidden element.
       // An answer through the consent tool's own script (no click) reaches a state no visitor can reach.

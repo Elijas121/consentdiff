@@ -33,8 +33,8 @@ export async function visitorIdentity(browser: Browser): Promise<VisitorIdentity
     const page = await context.newPage();
     // userAgentData needs a secure context. The probe page is served locally by the route below and
     // never reaches the network (.invalid cannot resolve).
-    await page.route("https://consentprobe.invalid/**", (route) => route.fulfill({ contentType: "text/html", body: "<!doctype html><title>probe</title>" }));
-    await page.goto("https://consentprobe.invalid/", { timeout: 5000 });
+    await page.route("https://consentdiff.invalid/**", (route) => route.fulfill({ contentType: "text/html", body: "<!doctype html><title>probe</title>" }));
+    await page.goto("https://consentdiff.invalid/", { timeout: 5000 });
     const probe = await page.evaluate(async () => {
       const data = (navigator as Navigator & { userAgentData?: { brands: Brand[]; mobile: boolean; getHighEntropyValues(h: string[]): Promise<Record<string, unknown>> } }).userAgentData;
       const high = data

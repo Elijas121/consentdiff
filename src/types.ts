@@ -104,7 +104,7 @@ export interface ConsentBanner {
   incomplete?: boolean;
   /** An accept control was found, but parts of the page did not respond while searching for a reject control. */
   rejectSearchIncomplete?: boolean;
-  /** Consent tool that autoconsent recognized when consentprobe's own search found no control. */
+  /** Consent tool that autoconsent recognized when consentdiff's own search found no control. */
   autoconsentCmp?: string;
 }
 
@@ -145,7 +145,7 @@ export interface ScanOptions {
   screenshotDir?: string;
   /** Check for an imprint link: "auto" only on German-language or .de/.at/.ch sites (default). */
   imprint?: "auto" | "always" | "never";
-  /** Second engine (autoconsent) for banners consentprobe's own search does not know. Default: on. */
+  /** Second engine (autoconsent) for banners consentdiff's own search does not know. Default: on. */
   autoconsent?: boolean;
   /** Replaces autoconsent's bundled rules (a rules.json text). For tests only. */
   autoconsentRules?: string;
@@ -153,7 +153,7 @@ export interface ScanOptions {
 
 export interface ScanResult {
   /** Tool, browser and Playwright versions, so a result can be reproduced. */
-  tool: { name: "consentprobe"; version: string; browser?: string; playwright?: string };
+  tool: { name: "consentdiff"; version: string; browser?: string; playwright?: string };
   url: string;
   finalUrl: string;
   scannedAt: string;

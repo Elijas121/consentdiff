@@ -4,7 +4,7 @@ import type { ScanResult } from "../src/types.js";
 
 describe("markdown report escaping", () => {
   const base: ScanResult = {
-    tool: { name: "consentprobe", version: "0.0.0" },
+    tool: { name: "consentdiff", version: "0.0.0" },
     url: "https://example.com/",
     finalUrl: "https://example.com/",
     scannedAt: "2026-01-01T00:00:00.000Z",
